@@ -1,4 +1,4 @@
-module github.com/bmwadforth/go-lib
+module github.com/bmwadforth/galaxy
 
 go 1.22.1
 

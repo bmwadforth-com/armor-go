@@ -1,2 +1,14 @@
-.idea
+# Binaries and compiled artifacts
+bin/
+out/
 
+# Dependency management 
+vendor/
+
+# IDE/Editor configurations (adapt as needed)
+.idea/
+*.swp
+
+# Logs and test outputs
+*.log
+test-results/
