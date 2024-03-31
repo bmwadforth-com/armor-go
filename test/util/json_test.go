@@ -1,7 +1,7 @@
 package util_test
 
 import (
-	"github.com/bmwadforth/go-lib/src/util"
+	"github.com/bmwadforth/galaxy/src/util"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
