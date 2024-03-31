@@ -3,16 +3,8 @@ package util_test
 import (
 	"github.com/bmwadforth/galaxy/src/util"
 	"github.com/stretchr/testify/assert"
-	"os"
 	"testing"
 )
-
-func TestMain(m *testing.M) {
-	// Perform any test setup here
-	util.InitLogger()
-
-	os.Exit(m.Run())
-}
 
 func TestSerializeJson_Success(t *testing.T) {
 	data := struct {
