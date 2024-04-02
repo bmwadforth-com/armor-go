@@ -1,7 +1,6 @@
 steps:
   - name: 'gcr.io/cloud-builders/gcloud'
     args:
-      - gcloud
       - artifacts
       - go
       - upload
@@ -11,6 +10,7 @@ steps:
       - --module-path=github.com/bmwadforth/galaxy
       - --version=$TAG_NAME
       - --source=..
+    entrypoint: gcloud
     id: publish
 
 options:
