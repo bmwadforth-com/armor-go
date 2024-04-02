@@ -12,3 +12,4 @@ vendor/
 # Logs and test outputs
 *.log
 test-results/
+coverage.out
