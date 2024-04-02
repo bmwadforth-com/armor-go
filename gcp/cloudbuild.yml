@@ -1,13 +1,6 @@
 steps:
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     args:
-      - 'sh'
-      - '-c'
-      - 'apt-get install -y google-cloud-cli-package-go-module'
-    id: prepare
-
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    args:
       - gcloud
       - artifacts
       - go
@@ -19,8 +12,6 @@ steps:
       - --version=$TAG_NAME
       - --source=..
     id: publish
-    waitFor:
-      - prepare
 
 options:
   machineType:  N1_HIGHCPU_8
