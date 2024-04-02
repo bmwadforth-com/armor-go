@@ -3,7 +3,7 @@ steps:
     args:
       - 'sh'
       - '-c'
-      - 'sudo apt-get update && sudo apt-get install -y google-cloud-cli-package-go-module'
+      - 'apt-get install -y google-cloud-cli-package-go-module'
     id: prepare
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
