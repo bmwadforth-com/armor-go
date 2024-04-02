@@ -9,7 +9,6 @@ steps:
       - --repository=bmwadforth-go
       - --module-path=github.com/bmwadforth/galaxy
       - --version=$TAG_NAME
-      - --source=..
     entrypoint: gcloud
     id: publish
 
