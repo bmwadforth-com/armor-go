@@ -1,5 +1,9 @@
 steps:
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    args: ['gcloud', 'components', 'install', 'package-go-module']
+    id: prepare
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     args:
       - gcloud
       - artifacts
@@ -10,8 +14,10 @@ steps:
       - --repository=bmwadforth-go
       - --module-path=github.com/bmwadforth/galaxy
       - --version=$TAG_NAME
-      - --source=../
+      - --source=..
     id: publish
+    waitFor:
+      - prepare
 
 options:
   machineType:  N1_HIGHCPU_8
