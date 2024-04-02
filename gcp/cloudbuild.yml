@@ -10,6 +10,7 @@ steps:
       - --repository=bmwadforth-go
       - --module-path=github.com/bmwadforth/galaxy
       - --version=$TAG_NAME
+      - --source=../
     id: publish
 
 options:
