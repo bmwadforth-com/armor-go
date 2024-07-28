@@ -1,4 +1,4 @@
-name: Galaxy - Build and Test
+name: armor-go - Build and Test
 
 on:
   pull_request:
