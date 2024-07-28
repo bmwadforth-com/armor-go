@@ -1,4 +1,4 @@
-# Galaxy
+# armor-go
 
 ## Publishing
 - Make your changes and create a PR to master
@@ -15,25 +15,25 @@ https://cloud.google.com/artifact-registry/docs/go/manage-modules#use_a_module_a
 
 ## Quick Start
 
-Here's an example on how you can use Galaxy.
+Here's an example on how you can use armor-go.
 
 ```go
 package main
 
 import (
 	"fmt"
-	galaxyutil "github.com/bmwadforth/galaxy/src/util"
+	armor "github.com/bmwadforth/armor-go/src/util"
 )
 
 func main() {
-	galaxyutil.InitLogger()
+	armor.InitLogger()
 
 	data := struct {
 		Name string `json:"name"`
 		Age  int    `json:"age"`
 	}{Name: "John", Age: 30}
 
-	result, err := galaxyutil.SerializeJson(data)
+	result, err := armor.SerializeJson(data)
 	if err != nil {
 		// Handle error
 	}

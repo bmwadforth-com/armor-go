@@ -2,13 +2,13 @@
 all: build test
 
 build:
-	go build -o galaxy ./src/**
+	go build -o armor-go ./src/**
 
 test:
 	go test -v ./...
 
 clean:
-	rm -f galaxy
+	rm -f armor-go
 
 # Optional targets (add as needed)
 lint:

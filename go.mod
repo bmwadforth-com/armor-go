@@ -1,4 +1,4 @@
-module github.com/bmwadforth/galaxy
+module github.com/bmwadforth/armor-go
 
 go 1.22.1
 

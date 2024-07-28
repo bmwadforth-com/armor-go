@@ -1,7 +1,7 @@
 package util_test
 
 import (
-	"github.com/bmwadforth/galaxy/src/util"
+	"github.com/bmwadforth/armor-go/src/util"
 	"os"
 	"testing"
 )
