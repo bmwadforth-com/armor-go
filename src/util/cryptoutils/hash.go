@@ -36,7 +36,7 @@ func PasswordHashMatch(hashedPassword []byte, password []byte) (bool, error) {
 	if err != nil {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
 			util.LogWarn("mismatch between hash and password")
-			return false, nil
+			return false, err
 		} else {
 			util.LogError("unable to compare password hashes: %v", err)
 			return false, err
