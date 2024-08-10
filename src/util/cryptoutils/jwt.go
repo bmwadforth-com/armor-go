@@ -1,7 +1,7 @@
 package cryptoutils
 
 import (
-	"fmt"
+	"github.com/bmwadforth-com/armor-go/src/util"
 	"github.com/bmwadforth/jwt"
 	"time"
 )
@@ -14,17 +14,15 @@ func NewBearerToken(signingKey string) []byte {
 	claims.Add(string(jwt.Subject), "web-template")
 	claims.Add(string(jwt.IssuedAt), time.Now())
 
-	//Create new HS256 token, set claims and key
 	token, err := jwt.New(jwt.HS256, claims, key)
 	if err != nil {
-		fmt.Println(err.Error())
+		util.LogError("unable to create token: %v", err)
 		return nil
 	}
 
-	//Encode token
 	tokenBytes, err := token.Encode()
 	if err != nil {
-		fmt.Println(err.Error())
+		util.LogError("unable to encode token: %v", err)
 		return nil
 	}
 
@@ -34,17 +32,15 @@ func NewBearerToken(signingKey string) []byte {
 func ValidateBearerToken(tokenString string, signingKey string) bool {
 	key := []byte(signingKey)
 
-	//Parse token string
 	token, err := jwt.Parse(tokenString, key)
 	if err != nil {
-		fmt.Println(err.Error())
+		util.LogError("unable to parse token: %v", err)
 		return false
 	}
 
-	//Validate token
 	_, err = jwt.Validate(token)
 	if err != nil {
-		fmt.Println(err.Error())
+		util.LogError("unable to validate token: %v", err)
 		return false
 	}
 
@@ -54,10 +50,9 @@ func ValidateBearerToken(tokenString string, signingKey string) bool {
 func GetTokenClaims(tokenString string, signingKey string) map[string]interface{} {
 	key := []byte(signingKey)
 
-	//Parse token string
 	token, err := jwt.Parse(tokenString, key)
 	if err != nil {
-		fmt.Println(err.Error())
+		util.LogError("unable to parse token claims: %v", err)
 		return nil
 	}
 
