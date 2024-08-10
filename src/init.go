@@ -15,7 +15,7 @@ var (
 	CleanupLogger func(*zap.Logger)
 )
 
-func InitArmor[T util.Configurable](isRelease bool, config T, configPath string) error {
+func InitArmor[T util.Configuration](isRelease bool, config T, configPath string) error {
 	ArmorContext = context.Background()
 	IsRelease = isRelease
 	InitCalled = true

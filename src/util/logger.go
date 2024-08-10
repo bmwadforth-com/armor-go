@@ -31,7 +31,12 @@ func Log(lvl zapcore.Level, template string, args ...interface{}) {
 
 func LogInfo(template string, args ...interface{}) {
 	msg := fmt.Sprintf(template, args...)
-	SLogger.Logf(zap.InfoLevel, fmt.Sprintf("[Armor - INFORMATION]: %s", msg))
+	SLogger.Logf(zap.InfoLevel, fmt.Sprintf("[Armor - INFO]: %s", msg))
+}
+
+func LogWarn(template string, args ...interface{}) {
+	msg := fmt.Sprintf(template, args...)
+	SLogger.Logf(zap.WarnLevel, fmt.Sprintf("[Armor - WARN]: %s", msg))
 }
 
 func LogError(template string, args ...interface{}) {

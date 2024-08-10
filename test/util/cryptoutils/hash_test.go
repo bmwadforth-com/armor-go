@@ -1,4 +1,4 @@
-package util_test
+package cryptoutils_test
 
 import (
 	"github.com/bmwadforth-com/armor-go/src/util/cryptoutils"
@@ -36,12 +36,10 @@ func TestPasswordHashMatch(t *testing.T) {
 	case1, _ := cryptoutils.PasswordHashMatch(hashedPassword, password)
 	case2, _ := cryptoutils.PasswordHashMatch(hashedPassword, []byte("wrongpassword"))
 	case3, _ := cryptoutils.PasswordHashMatch([]byte("invalid"), password)
-	// Success case
+
 	assert.True(t, case1, "Passwords should match")
 
-	// Failure case
 	assert.False(t, case2, "Passwords shouldn't match")
 
-	// Error case with invalid hashedPassword
 	assert.False(t, case3, "PasswordHashMatch should fail with invalid input")
 }

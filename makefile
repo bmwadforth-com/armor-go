@@ -5,7 +5,7 @@ build:
 	go build -o armor-go ./src/**
 
 test:
-	go test -v ./...
+	go test -v ./test/...
 
 clean:
 	rm -f armor-go

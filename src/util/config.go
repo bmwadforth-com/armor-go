@@ -8,44 +8,20 @@ import (
 	"os"
 )
 
-type Configurable interface {
-	Validate() error // Optional: Add a validation method if needed
+// Configuration represents a type that can be loaded with configuration data
+// and optionally validated.
+type Configuration interface {
+	Validate() error
 }
 
-/*
-	How to use in Go project:
-	var config struct {
-		ProjectId          string `json:"ProjectId" env:"WEB_TEMPLATE__PROJECTID"`
-		ApiKey             string `json:"ApiKey" env:"WEB_TEMPLATE__APIKEY"`
-		JwtSigningKey      string `json:"jwtSigningKey" env:"WEB_TEMPLATE__JWTSIGNINGKEY"`
-		FireStoreDatabase  string `json:"fireStoreDatabase" env:"WEB_TEMPLATE__FIRESTOREDATABASE"`
-		CloudStorageBucket string `json:"cloudStorageBucket" env:"WEB_TEMPLATE__CLOUDSTORAGEBUCKET"`
-		Database           struct {
-			Host     string `json:"host" env:"WEB_TEMPLATE__DATABASE_HOST"`
-			Name     string `json:"name" env:"WEB_TEMPLATE__DATABASE_NAME"`
-			Username string `json:"user" env:"WEB_TEMPLATE__DATABASE_USERNAME"`
-			Password string `json:"pass" env:"WEB_TEMPLATE__DATABASE_PASSWORD"`
-			Port     string `json:"port" env:"WEB_TEMPLATE__DATABASE_PORT"`
-			SSL      bool   `json:"SSL" env:"WEB_TEMPLATE__DATABASE_SSL"`
-		} `json:"database"`
-	}
-
-	err := util.LoadConfiguration("path/to/config.json", &config)
-	if err != nil {
-		// Handle error
-	}
-
-    // config.ProjectId will now have the value loaded from the JSON file
-
-	err = util.LoadEnvironmentVariables(&config)
-	if err != nil {
-		// Handle error
-	}
-
-	// config.ProjectId will now have the value loaded from the 'WEB_TEMPLATE__PROJECTID' env variable
-*/
-
-func LoadConfiguration[T Configurable](configFilePath string, config T) error {
+// LoadConfiguration loads configuration data from a JSON file into the provided
+// 'config' struct. The 'config' struct should implement the 'Configuration'
+// interface. If a 'Validate' method is present on the 'config' struct, it will
+// be called after loading to ensure configuration validity.
+//
+// Returns an error if there's an issue reading the file, unmarshalling the JSON,
+// or if validation fails.
+func LoadConfiguration[T Configuration](configFilePath string, config T) error {
 	bytes, err := os.ReadFile(configFilePath)
 	if err != nil {
 		return fmt.Errorf("failed to read config file: %w", err)
@@ -65,10 +41,19 @@ func LoadConfiguration[T Configurable](configFilePath string, config T) error {
 	return nil
 }
 
-func LoadEnvironmentVariables[T Configurable](config T) error {
+// LoadEnvironmentVariables loads configuration data from environment variables
+// into the provided 'config' struct. The 'config' struct should implement the
+// 'Configuration' interface.  struct tags with the "env" key are used to map
+// environment variables to struct fields. If a 'Validate' method is present on
+// the 'config' struct, it will be called after loading to ensure configuration
+// validity.
+//
+// Returns an error if there's an issue processing environment variables or if
+// validation fails.
+func LoadEnvironmentVariables[T Configuration](config T) error {
 	ctx := context.Background()
 
-	if err := envconfig.Process(ctx, &config); err != nil {
+	if err := envconfig.Process(ctx, config); err != nil {
 		return fmt.Errorf("failed to process environment variables: %w", err)
 	}
 
