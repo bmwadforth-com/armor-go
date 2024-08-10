@@ -7,7 +7,7 @@ steps:
       - --project=digital-node-1176
       - --location=australia-southeast2
       - --repository=bmwadforth-go
-      - --module-path=github.com/bmwadforth/armor-go
+      - --module-path=github.com/bmwadforth-com/armor-go
       - --version=$TAG_NAMER
     entrypoint: gcloud
     id: publish

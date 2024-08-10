@@ -1,11 +1,11 @@
-name: armor-go - Build and Test
+name: Build
 
 on:
   pull_request:
     branches: [ master ]
 
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
 
     steps:

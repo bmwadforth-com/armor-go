@@ -1,7 +1,7 @@
 package util_test
 
 import (
-	"github.com/bmwadforth/armor-go/src/util"
+	"github.com/bmwadforth-com/armor-go/src/util"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
