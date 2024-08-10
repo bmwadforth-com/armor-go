@@ -1,17 +1,15 @@
 # armor-go
 
 ## Publishing
-- Make your changes and create a PR to master
-- Make sure the build and test pipeline passes
-- If success, merge to master
-- Checkout master and pull the latest
-- Create a new tag and push tag
-- Example: `git tag v1.0.0 && git push origin v1.0.0`
-- The above command will publish a new version of the library to GCP artifactory based on the tag version
 
-## Using Library
-Once you've figured out what version you want to use, you need to follow this guide to setup Go to fetch from the private artifact registry where the go modules are stored.
-https://cloud.google.com/artifact-registry/docs/go/manage-modules#use_a_module_as_a_dependency
+Merging into master will cause the code in master to be released. The version of the release will depend on your commit
+message. Your commit messages will follow the conventions
+defined [here](https://www.conventionalcommits.org/en/v1.0.0/).
+
+1. PR is merged into master
+2. If your last commit to the base branch merging into master followed the commit conventions defined earlier a PR will
+   be created automatically to create a new release
+3. Once the above PR is merged a new release will be created for you to use in your own Go projects.
 
 ## Quick Start
 
@@ -22,7 +20,7 @@ package main
 
 import (
 	"fmt"
-	armor "github.com/bmwadforth/armor-go/src/util"
+	armor "github.com/bmwadforth-com/armor-go/src/util"
 )
 
 func main() {
