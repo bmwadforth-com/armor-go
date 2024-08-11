@@ -1,6 +1,7 @@
 # Binaries and compiled artifacts
 bin/
 out/
+**/.DS_Store
 
 # Dependency management 
 vendor/
