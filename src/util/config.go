@@ -16,7 +16,7 @@ type Configuration interface {
 
 // LoadConfiguration loads configuration data from a JSON file into the provided
 // 'config' struct. The 'config' struct should implement the 'Configuration'
-// interface. If a 'Validate' method is present on the 'config' struct, it will
+// interface. If a 'ValidateJws' method is present on the 'config' struct, it will
 // be called after loading to ensure configuration validity.
 //
 // Returns an error if there's an issue reading the file, unmarshalling the JSON,
@@ -44,7 +44,7 @@ func LoadConfiguration[T Configuration](configFilePath string, config T) error {
 // LoadEnvironmentVariables loads configuration data from environment variables
 // into the provided 'config' struct. The 'config' struct should implement the
 // 'Configuration' interface.  struct tags with the "env" key are used to map
-// environment variables to struct fields. If a 'Validate' method is present on
+// environment variables to struct fields. If a 'ValidateJws' method is present on
 // the 'config' struct, it will be called after loading to ensure configuration
 // validity.
 //

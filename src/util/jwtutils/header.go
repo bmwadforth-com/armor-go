@@ -5,8 +5,7 @@ import (
 	"encoding/json"
 )
 
-// Serialize header struct into JSON
-func (h *Header) ToJson() ([]byte, error) {
+func (h *Header) toJson() ([]byte, error) {
 	jsonBytes, err := json.Marshal(h.Properties)
 	if err != nil {
 		return nil, err
@@ -15,9 +14,8 @@ func (h *Header) ToJson() ([]byte, error) {
 	return jsonBytes, nil
 }
 
-// Serialize header struct into JSON and then Encode in b64
-func (h *Header) ToBase64() ([]byte, error) {
-	jsonBytes, err := h.ToJson()
+func (h *Header) toBase64() ([]byte, error) {
+	jsonBytes, err := h.toJson()
 	if err != nil {
 		return nil, err
 	}
@@ -29,8 +27,7 @@ func (h *Header) ToBase64() ([]byte, error) {
 	return []byte(b64Bytes), nil
 }
 
-// Deserialize JSON into header struct
-func (h *Header) FromJson(b []byte) (*Header, error) {
+func (h *Header) fromJson(b []byte) (*Header, error) {
 	err := json.Unmarshal(b, &h.Properties)
 	if err != nil {
 		return nil, err
@@ -39,8 +36,7 @@ func (h *Header) FromJson(b []byte) (*Header, error) {
 	return h, nil
 }
 
-// Deserialize b64 into JSON and then into header struct
-func (h *Header) FromBase64(b []byte) (*Header, error) {
+func (h *Header) fromBase64(b []byte) (*Header, error) {
 	jsonBytes, err := base64.RawURLEncoding.DecodeString(string(b))
 	if err != nil {
 		return nil, err
