@@ -35,7 +35,7 @@ func signRSAOAEPA256GCM(t *Token, signingInput []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	block, _ := pem.Decode(t.publicKey)
+	block, _ := pem.Decode(t.PublicKey)
 	if block == nil {
 		panic("failed to parse PEM block containing the public key")
 	}

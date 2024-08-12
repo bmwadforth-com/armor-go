@@ -5,7 +5,6 @@ import (
 	"github.com/bmwadforth-com/armor-go/src/util/jwt/common"
 	"github.com/bmwadforth-com/armor-go/src/util/jwt/jwe"
 	"github.com/bmwadforth-com/armor-go/src/util/jwt/jws"
-	"log"
 	"strings"
 )
 
@@ -92,12 +91,10 @@ func Decode(tokenString string, key []byte) (*common.Token, error) {
 		token.Claims = jwsToken.Payload.ClaimSet
 	case 5:
 		token.TokenType = common.JWE
-		tokenInstance, ok := token.TokenInstance.(*jwe.Token)
-		if !ok {
-			return nil, errors.New("invalid token")
-		}
-
-		err := tokenInstance.Decode(jwtParts)
+		jweToken := new(jwe.Token)
+		jweToken.PrivateKey = key
+		token.TokenInstance = jweToken
+		err = jweToken.Decode(jwtParts)
 		if err != nil {
 			return nil, err
 		}
@@ -121,7 +118,11 @@ func Validate(t *common.Token) (bool, error) {
 		}
 		return tokenInstance.Validate()
 	case common.JWE:
-		log.Fatal("JWE Not Implemented")
+		tokenInstance, ok := t.TokenInstance.(*jwe.Token)
+		if !ok {
+			return false, errors.New("invalid token")
+		}
+		return tokenInstance.Validate()
 	}
 
 	return false, errors.New("unable to decode - please check algorithm")
