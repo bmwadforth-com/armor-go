@@ -89,7 +89,7 @@ func Decode(tokenString string, key []byte) (*common.Token, error) {
 		if err != nil {
 			return nil, err
 		}
-		token.Claims = jwsToken.ClaimSet
+		token.Claims = jwsToken.Payload.ClaimSet
 	case 5:
 		token.TokenType = common.JWE
 		tokenInstance, ok := token.TokenInstance.(*jwe.Token)

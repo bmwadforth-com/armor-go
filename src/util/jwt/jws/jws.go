@@ -12,9 +12,9 @@ type SignFunc func(t *Token, signingInput []byte) ([]byte, error)
 type ValidateFunc func(t *Token) (bool, error)
 
 type Token struct {
-	common.Header
-	common.Payload
-	common.Signature
+	Header    common.Header
+	Payload   common.Payload
+	Signature common.Signature
 	SignFunc
 	ValidateFunc
 	Key []byte
@@ -108,7 +108,7 @@ func (t *Token) Validate() (bool, error) {
 	}
 
 	//TODO: ValidateJws more claims
-	exp, ok := t.ClaimSet[string(common.ExpirationTime)]
+	exp, ok := t.Payload.ClaimSet[string(common.ExpirationTime)]
 	if ok {
 		claim := exp.(string)
 		expiration, err := time.Parse(time.RFC3339, claim)

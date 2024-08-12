@@ -38,6 +38,10 @@ var (
 	JweAuthAlgorithmsMap = map[AuthAlgorithmType]bool{
 		A256GCM: true,
 	}
+
+	JweAuthAlgorithmSizeMap = map[AuthAlgorithmType]int{
+		A256GCM: 32,
+	}
 )
 
 type Header struct {

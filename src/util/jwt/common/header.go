@@ -78,3 +78,31 @@ func (h *Header) GetAlgorithm() (AlgorithmType, error) {
 
 	return algorithm, nil
 }
+
+func (h *Header) GetAuthAlgorithm() (AuthAlgorithmType, error) {
+	if h.Raw == nil {
+		return "", errors.New("arguments were invalid")
+	}
+
+	headerJSON, err := base64.RawURLEncoding.DecodeString(string(h.Raw))
+	if err != nil {
+		return "", err
+	}
+
+	var headerMap map[string]interface{}
+	if err := json.Unmarshal(headerJSON, &headerMap); err != nil {
+		return "", err
+	}
+
+	algorithm, ok := headerMap["enc"].(AuthAlgorithmType)
+	if !ok {
+		algorithmStr, ok := headerMap["enc"].(string)
+		if ok {
+			algorithm = AuthAlgorithmType(algorithmStr)
+		} else {
+			return "", errors.New("algorithm could not be decoded")
+		}
+	}
+
+	return algorithm, nil
+}
