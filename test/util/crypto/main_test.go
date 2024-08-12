@@ -1,4 +1,4 @@
-package jwtutils_test
+package crypto_test
 
 import (
 	"github.com/bmwadforth-com/armor-go/src/util"

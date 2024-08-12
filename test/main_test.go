@@ -1,4 +1,4 @@
-package armor_test
+package test
 
 import (
 	"github.com/bmwadforth-com/armor-go/src/util"
