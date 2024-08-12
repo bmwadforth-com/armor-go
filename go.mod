@@ -3,7 +3,6 @@ module github.com/bmwadforth-com/armor-go
 go 1.22.1
 
 require (
-	github.com/bmwadforth/jwt v0.0.0-20200808103042-0cfe6fb60acf
 	github.com/sethvargo/go-envconfig v1.1.0
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/zap v1.27.0
