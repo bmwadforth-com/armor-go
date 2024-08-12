@@ -2,6 +2,7 @@ package jwt
 
 import (
 	"errors"
+	"log"
 	"strings"
 )
 
@@ -33,7 +34,7 @@ type tokenInstance interface {
 type Token struct {
 	TokenType
 	tokenInstance
-	Claims ClaimSet
+	Claims map[string]interface{}
 	Raw    []byte
 }
 
@@ -52,7 +53,7 @@ func New(alg AlgorithmType, claims ClaimSet, key []byte) (*Token, error) {
 	token := new(Token)
 	token.TokenType = tokenType
 	token.Raw = []byte{}
-	token.Claims = claims
+	token.Claims = claims.Claims
 
 	switch token.TokenType {
 	case JWS:
@@ -61,7 +62,6 @@ func New(alg AlgorithmType, claims ClaimSet, key []byte) (*Token, error) {
 			return nil, err
 		}
 		token.tokenInstance = jwsToken
-		token.Claims = claims
 		break
 	case JWE:
 		jweToken, err := newJweToken(alg, claims, key)
@@ -69,7 +69,6 @@ func New(alg AlgorithmType, claims ClaimSet, key []byte) (*Token, error) {
 			return nil, err
 		}
 		token.tokenInstance = jweToken
-		token.Claims = claims
 		break
 	}
 
@@ -107,20 +106,19 @@ func Encode(t *Token) ([]byte, error) {
 func Decode(tokenString string, key []byte) (*Token, error) {
 	token := Token{Raw: []byte(tokenString)}
 	jwtParts := strings.Split(tokenString, ".")
+	var err error
 
 	switch len(jwtParts) {
 	case 3:
 		token.TokenType = JWS
-		tokenInstance, ok := token.tokenInstance.(*JwsToken)
-		if !ok {
-			return nil, errors.New("invalid token")
-		}
-		tokenInstance.key = key
-
-		err := tokenInstance.decode(jwtParts)
+		jwsToken := new(JwsToken)
+		jwsToken.key = key
+		token.tokenInstance = jwsToken
+		err = jwsToken.decode(jwtParts)
 		if err != nil {
 			return nil, err
 		}
+		token.Claims = jwsToken.Claims
 	case 5:
 		token.TokenType = JWE
 		tokenInstance, ok := token.tokenInstance.(*JweToken)
@@ -139,29 +137,21 @@ func Decode(tokenString string, key []byte) (*Token, error) {
 	return &token, nil
 }
 
-/*
 func Validate(t *Token) (bool, error) {
 	if t.Raw == nil {
-		return false, errors.New("jwt token is empty - you must call parse before validate")
+		return false, errors.New("jwt token is empty - you must call decode before validate")
 	}
 
-	algorithm, err := getAlgType(t)
-	if err != nil {
-		return false, err
-	}
-
-	tokenType, err := getTokenType(algorithm)
-	if err != nil {
-		return false, err
-	}
-
-	switch tokenType {
+	switch t.TokenType {
 	case JWS:
-		return t.ValidateJws()
+		tokenInstance, ok := t.tokenInstance.(*JwsToken)
+		if !ok {
+			return false, errors.New("invalid token")
+		}
+		return tokenInstance.validate()
 	case JWE:
 		log.Fatal("JWE Not Implemented")
 	}
 
 	return false, errors.New("unable to decode - please check algorithm")
 }
-*/

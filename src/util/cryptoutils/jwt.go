@@ -20,7 +20,7 @@ func NewBearerToken(signingKey string) []byte {
 		return nil
 	}
 
-	tokenBytes, err := token.Encode()
+	tokenBytes, err := jwt.Encode(token)
 	if err != nil {
 		util.LogError("unable to encode token: %v", err)
 		return nil

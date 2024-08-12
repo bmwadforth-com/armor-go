@@ -1,6 +1,8 @@
 package jwt
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"errors"
 )
 
@@ -30,29 +32,28 @@ func getTokenType(alg AlgorithmType) (TokenType, error) {
 	return "", errors.New("unable to determine token type - check algorithm is supported")
 }
 
-/*
-func getAlgType(t *Token) (AlgorithmType, error) {
-	if t == nil {
-		return "", errors.New("token is nil")
+func getAlgType(tokenType TokenType, headerPart string) (AlgorithmType, error) {
+	if headerPart == "" || tokenType == "" {
+		return "", errors.New("arguments were invalid")
 	}
 
-	if t.Raw == nil {
-		return "", errors.New("token is empty")
-	}
-
-	err := t.Decode()
+	headerJSON, err := base64.RawURLEncoding.DecodeString(headerPart)
 	if err != nil {
 		return "", err
 	}
 
-	var algorithm AlgorithmType
+	var headerMap map[string]interface{}
+	if err := json.Unmarshal(headerJSON, &headerMap); err != nil {
+		return "", err
+	}
 
-	switch t.TokenType {
+	var algorithm AlgorithmType
+	var ok bool
+	switch tokenType {
 	case JWS:
-		token, ok := t.tokenInstance.(*JwsToken)
-		algorithm, ok = token.Header.Properties["alg"].(AlgorithmType)
+		algorithm, ok = headerMap["alg"].(AlgorithmType)
 		if !ok {
-			algorithmStr, ok := token.Header.Properties["alg"].(string)
+			algorithmStr, ok := headerMap["alg"].(string)
 			if ok {
 				algorithm = AlgorithmType(algorithmStr)
 			} else {
@@ -64,4 +65,4 @@ func getAlgType(t *Token) (AlgorithmType, error) {
 	}
 
 	return algorithm, nil
-}*/
+}

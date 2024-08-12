@@ -2,7 +2,7 @@
 all: build test
 
 build:
-	go build -o armor-go ./src/**
+	go build ./src/...
 
 test:
 	go test -v ./test/...

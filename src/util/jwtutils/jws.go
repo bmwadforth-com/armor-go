@@ -80,24 +80,36 @@ func (t *JwsToken) encode() ([]byte, error) {
 }
 
 func (t *JwsToken) decode(parts []string) error {
-	_, err := t.Header.fromBase64([]byte(parts[0]))
+	headerBytes := []byte(parts[0])
+	t.Header.raw = headerBytes
+	_, err := t.Header.fromBase64(headerBytes)
 	if err != nil {
 		return fmt.Errorf("failed to decode JWS header: %w", err)
 	}
 
-	_, err = t.Payload.fromBase64([]byte(parts[1]))
+	payloadBytes := []byte(parts[1])
+	t.Payload.raw = payloadBytes
+	_, err = t.Payload.fromBase64(payloadBytes)
 	if err != nil {
 		return fmt.Errorf("failed to decode JWS payload: %w", err)
 	}
 
 	t.Signature.raw = []byte(parts[2])
 
+	alg, err := getAlgType(JWS, parts[0])
+	if err != nil {
+		return err
+	}
+	t.raw = []byte(fmt.Sprintf("%s.%s.%s", t.Header.raw, t.Payload.raw, t.Signature.raw))
+	t.jwsSignFunc = getJwsSignFunc(alg)
+	t.jwsValidateFunc = getJwsValidateFunc(alg)
+
 	return nil
 }
 
 func (t *JwsToken) validate() (bool, error) {
 	if t.jwsValidateFunc == nil {
-		return false, errors.New("unable to verify data without a validating function defined")
+		return false, errors.New("unable to verify data without a validating function defined. Please make sure you have invoked Decode before invoking Validate")
 	}
 
 	valid, err := t.jwsValidateFunc(t)

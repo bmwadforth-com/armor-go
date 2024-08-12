@@ -1,6 +1,7 @@
 package jwtutils
 
 import (
+	"errors"
 	"fmt"
 	jwt "github.com/bmwadforth-com/armor-go/src/util/jwtutils"
 	"testing"
@@ -27,7 +28,6 @@ func TestEncodeHMAC(t *testing.T) {
 	fmt.Println(string(encodedBytes))
 }
 
-/*
 func TestDecodeHMAC(t *testing.T) {
 	key := []byte("TEST")
 	tokenString := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJkZXZlbG9wZXJzIn0.4kNVyvKLfe6fuioUgM3rbWZ2PRQXRwYcC0c6cCQclGo"
@@ -56,4 +56,3 @@ func TestValidateHMAC(t *testing.T) {
 		t.Fatal(err)
 	}
 }
-*/

@@ -1,6 +1,8 @@
 package jwt
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 )
@@ -44,4 +46,23 @@ func (c *ClaimSet) Remove(key string) error {
 	}
 
 	return nil
+}
+
+func getClaims(payloadPart string) (ClaimSet, error) {
+	decodedPayload, err := base64.RawURLEncoding.DecodeString(payloadPart)
+	claimSet := NewClaimSet()
+	if err != nil {
+		return claimSet, fmt.Errorf("failed to decode payload: %w", err)
+	}
+
+	var claims map[string]interface{}
+	if err := json.Unmarshal(decodedPayload, &claims); err != nil {
+		return claimSet, fmt.Errorf("failed to unmarshal payload JSON: %w", err)
+	}
+
+	for key, value := range claims {
+		claimSet.Claims[key] = value
+	}
+
+	return claimSet, nil
 }
