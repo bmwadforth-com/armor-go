@@ -32,7 +32,7 @@ func NewBearerToken(signingKey string) []byte {
 func ValidateBearerToken(tokenString string, signingKey string) bool {
 	key := []byte(signingKey)
 
-	token, err := jwt.Parse(tokenString, key)
+	token, err := jwt.Decode(tokenString, key)
 	if err != nil {
 		util.LogError("unable to parse token: %v", err)
 		return false
@@ -50,7 +50,7 @@ func ValidateBearerToken(tokenString string, signingKey string) bool {
 func GetTokenClaims(tokenString string, signingKey string) map[string]interface{} {
 	key := []byte(signingKey)
 
-	token, err := jwt.Parse(tokenString, key)
+	token, err := jwt.Decode(tokenString, key)
 	if err != nil {
 		util.LogError("unable to parse token claims: %v", err)
 		return nil

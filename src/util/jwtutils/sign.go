@@ -7,20 +7,19 @@ import (
 	"crypto/rsa"
 	"crypto/sha256"
 	"crypto/x509"
-	"encoding/base64"
 	"encoding/pem"
-	"errors"
-	"fmt"
 )
 
-func getSignFunc(a AlgorithmType) SignFunc {
+type jwsSignFunc func(t *JwsToken, signingInput []byte) ([]byte, error)
+
+func getJwsSignFunc(a AlgorithmType) jwsSignFunc {
 	switch a {
 	case HS256:
 		return signHMAC256
 	case RS256:
 		return signRSA256
 	case None:
-		return func(_ *Token, _ []byte) ([]byte, error) {
+		return func(_ *JwsToken, _ []byte) ([]byte, error) {
 			return nil, nil
 		}
 	}
@@ -28,7 +27,7 @@ func getSignFunc(a AlgorithmType) SignFunc {
 	return nil
 }
 
-func signHMAC256(t *Token, signingInput []byte) ([]byte, error) {
+func signHMAC256(t *JwsToken, signingInput []byte) ([]byte, error) {
 	mac := hmac.New(sha256.New, t.key)
 	mac.Write(signingInput)
 	signedBytes := mac.Sum(nil)
@@ -36,7 +35,7 @@ func signHMAC256(t *Token, signingInput []byte) ([]byte, error) {
 	return signedBytes, nil
 }
 
-func signRSA256(t *Token, signingInput []byte) ([]byte, error) {
+func signRSA256(t *JwsToken, signingInput []byte) ([]byte, error) {
 	block, _ := pem.Decode(t.key)
 	key, _ := x509.ParsePKCS1PrivateKey(block.Bytes)
 
@@ -49,31 +48,4 @@ func signRSA256(t *Token, signingInput []byte) ([]byte, error) {
 	}
 
 	return signature, nil
-}
-
-func (t *Token) Sign() ([]byte, error) {
-	if t.SignFunc == nil {
-		return nil, errors.New("unable to sign data without a signing function defined")
-	}
-
-	//Header and payload haven't been base64 encoded, so let's do it
-	if len(t.Header.raw) == 0 && len(t.Payload.raw) == 0 {
-		_, err := t.Header.ToBase64()
-		if err != nil {
-			return nil, err
-		}
-		_, err = t.Payload.ToBase64()
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	signedBytes, err := t.SignFunc(t, []byte(fmt.Sprintf("%s.%s", t.Header.raw, t.Payload.raw)))
-	if err != nil {
-		return nil, err
-	}
-	signatureB64 := base64.RawURLEncoding.EncodeToString(signedBytes)
-	t.Signature.Raw = []byte(signatureB64)
-
-	return []byte(fmt.Sprintf("%s.%s.%s", t.Header.raw, t.Payload.raw, signatureB64)), nil
 }

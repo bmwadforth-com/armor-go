@@ -5,12 +5,26 @@ import (
 	"fmt"
 )
 
+type ClaimSet struct {
+	Claims map[string]interface{}
+}
+type RegisteredClaim string
+
+const (
+	Issuer         RegisteredClaim = "iss"
+	Subject        RegisteredClaim = "sub"
+	Audience       RegisteredClaim = "aud"
+	ExpirationTime RegisteredClaim = "exp"
+	NotBefore      RegisteredClaim = "nbf"
+	IssuedAt       RegisteredClaim = "iat"
+	JwtID          RegisteredClaim = "jti"
+)
+
 func NewClaimSet() ClaimSet {
 	return ClaimSet{Claims: map[string]interface{}{}}
 }
 
 func (c *ClaimSet) Add(key string, value interface{}) error {
-	//TODO: Ensure value is of JSON grammar
 	_, found := c.Claims[key]
 	if found {
 		return errors.New("duplicate claims are forbidden")
