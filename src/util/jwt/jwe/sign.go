@@ -8,8 +8,8 @@ import (
 	"crypto/sha256"
 	"crypto/x509"
 	"encoding/pem"
+	"errors"
 	"github.com/bmwadforth-com/armor-go/src/util/jwt/common"
-	"log"
 )
 
 func getJweSignFunc(a common.AlgorithmSuite) SignFunc {
@@ -37,33 +37,33 @@ func signRSAOAEPA256GCM(t *Token, signingInput []byte) ([]byte, error) {
 
 	block, _ := pem.Decode(t.PublicKey)
 	if block == nil {
-		panic("failed to parse PEM block containing the public key")
+		return nil, errors.New("failed to parse PEM block containing the public key")
 	}
 
 	publicKey, err := x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	rsaPublicKey := publicKey.(*rsa.PublicKey)
 
 	label := []byte("")
 	encryptedKey, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, rsaPublicKey, cek, label)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	aesBlock, err := aes.NewCipher(cek)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	aesGCM, err := cipher.NewGCM(aesBlock)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	nonce := make([]byte, aesGCM.NonceSize())
 	_, err = rand.Read(nonce)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	ciphertext := aesGCM.Seal(nil, nonce, signingInput, nil)
 
