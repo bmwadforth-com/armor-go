@@ -1,4 +1,4 @@
-package jwt
+package jws
 
 import (
 	"crypto"
@@ -8,18 +8,17 @@ import (
 	"crypto/sha256"
 	"crypto/x509"
 	"encoding/pem"
+	"github.com/bmwadforth-com/armor-go/src/util/jwt/common"
 )
 
-type jwsSignFunc func(t *JwsToken, signingInput []byte) ([]byte, error)
-
-func getJwsSignFunc(a AlgorithmType) jwsSignFunc {
+func getJwsSignFunc(a common.AlgorithmType) SignFunc {
 	switch a {
-	case HS256:
+	case common.HS256:
 		return signHMAC256
-	case RS256:
+	case common.RS256:
 		return signRSA256
-	case None:
-		return func(_ *JwsToken, _ []byte) ([]byte, error) {
+	case common.None:
+		return func(_ *Token, _ []byte) ([]byte, error) {
 			return nil, nil
 		}
 	}
@@ -27,16 +26,16 @@ func getJwsSignFunc(a AlgorithmType) jwsSignFunc {
 	return nil
 }
 
-func signHMAC256(t *JwsToken, signingInput []byte) ([]byte, error) {
-	mac := hmac.New(sha256.New, t.key)
+func signHMAC256(t *Token, signingInput []byte) ([]byte, error) {
+	mac := hmac.New(sha256.New, t.Key)
 	mac.Write(signingInput)
 	signedBytes := mac.Sum(nil)
 
 	return signedBytes, nil
 }
 
-func signRSA256(t *JwsToken, signingInput []byte) ([]byte, error) {
-	block, _ := pem.Decode(t.key)
+func signRSA256(t *Token, signingInput []byte) ([]byte, error) {
+	block, _ := pem.Decode(t.Key)
 	key, _ := x509.ParsePKCS1PrivateKey(block.Bytes)
 
 	rng := rand.Reader

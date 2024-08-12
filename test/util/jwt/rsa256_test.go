@@ -4,19 +4,22 @@ import (
 	"errors"
 	"fmt"
 	"github.com/bmwadforth-com/armor-go/src/util/jwt"
+	"github.com/bmwadforth-com/armor-go/src/util/jwt/common"
 	"os"
 	"testing"
 )
 
 func TestEncodeRSA256(t *testing.T) {
 	key, _ := os.ReadFile("./private.pem")
-	claims := jwt.NewClaimSet()
-	err := claims.Add(string(jwt.Audience), "developers")
+	claims := common.NewClaimSet()
+	err := claims.Add(string(common.Audience), "developers")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	token, err := jwt.New(jwt.RS256, claims, key)
+	token, err := jwt.New(common.AlgorithmSuite{
+		AlgorithmType: common.RS256,
+	}, claims, key)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,7 +41,7 @@ func TestDecodeRSA256(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if token.Claims[string(jwt.Audience)] != "developers" {
+	if token.Claims[string(common.Audience)] != "developers" {
 		t.Fatal(errors.New("claims not decoded correctly"))
 	}
 }

@@ -1,4 +1,4 @@
-package jwt
+package jws
 
 import (
 	"bytes"
@@ -10,18 +10,17 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"github.com/bmwadforth-com/armor-go/src/util/jwt/common"
 )
 
-type jwsValidateFunc func(t *JwsToken) (bool, error)
-
-func getJwsValidateFunc(a AlgorithmType) jwsValidateFunc {
+func getJwsValidateFunc(a common.AlgorithmType) ValidateFunc {
 	switch a {
-	case HS256:
+	case common.HS256:
 		return validateHMAC256
-	case RS256:
+	case common.RS256:
 		return validateRSA256
-	case None:
-		return func(_ *JwsToken) (bool, error) {
+	case common.None:
+		return func(_ *Token) (bool, error) {
 			return true, nil
 		}
 	}
@@ -29,11 +28,11 @@ func getJwsValidateFunc(a AlgorithmType) jwsValidateFunc {
 	return nil
 }
 
-func validateHMAC256(t *JwsToken) (bool, error) {
-	copiedRawToken := make([]byte, len(t.raw))
-	copy(copiedRawToken, t.raw)
+func validateHMAC256(t *Token) (bool, error) {
+	copiedRawToken := make([]byte, len(t.Raw))
+	copy(copiedRawToken, t.Raw)
 
-	encodedBytes, err := t.encode()
+	encodedBytes, err := t.Encode()
 	if err != nil {
 		return false, err
 	}
@@ -45,19 +44,19 @@ func validateHMAC256(t *JwsToken) (bool, error) {
 	return true, nil
 }
 
-func validateRSA256(t *JwsToken) (bool, error) {
-	block, _ := pem.Decode(t.key)
+func validateRSA256(t *Token) (bool, error) {
+	block, _ := pem.Decode(t.Key)
 	key, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {
 		return false, err
 	}
 
-	headerB64, _ := t.Header.toBase64()
-	payloadB64, _ := t.Payload.toBase64()
+	headerB64, _ := t.Header.ToBase64()
+	payloadB64, _ := t.Payload.ToBase64()
 
 	hashed := sha256.Sum256([]byte(fmt.Sprintf("%s.%s", headerB64, payloadB64)))
 
-	decodedSignature, err := base64.RawURLEncoding.DecodeString(string(t.Signature.raw))
+	decodedSignature, err := base64.RawURLEncoding.DecodeString(string(t.Signature.Raw))
 	if err != nil {
 		return false, err
 	}

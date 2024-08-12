@@ -3,20 +3,23 @@ package jwt
 import (
 	"errors"
 	"fmt"
-	jwt "github.com/bmwadforth-com/armor-go/src/util/jwt"
+	"github.com/bmwadforth-com/armor-go/src/util/jwt"
+	"github.com/bmwadforth-com/armor-go/src/util/jwt/common"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestEncodeHMAC(t *testing.T) {
 	key := []byte("TEST")
-	claims := jwt.NewClaimSet()
-	err := claims.Add(string(jwt.Audience), "developers")
+	claims := common.NewClaimSet()
+	err := claims.Add(string(common.Audience), "developers")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	token, err := jwt.New(jwt.HS256, claims, key)
+	token, err := jwt.New(common.AlgorithmSuite{
+		AlgorithmType: common.HS256,
+	}, claims, key)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,7 +41,7 @@ func TestDecodeHMAC(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if token.Claims[string(jwt.Audience)] != "developers" {
+	if token.Claims[string(common.Audience)] != "developers" {
 		t.Fatal(errors.New("claims not decoded correctly"))
 	}
 }

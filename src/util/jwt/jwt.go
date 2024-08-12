@@ -2,98 +2,69 @@ package jwt
 
 import (
 	"errors"
+	"github.com/bmwadforth-com/armor-go/src/util/jwt/common"
+	"github.com/bmwadforth-com/armor-go/src/util/jwt/jwe"
+	"github.com/bmwadforth-com/armor-go/src/util/jwt/jws"
 	"log"
 	"strings"
 )
 
-type TokenType string
-
-const (
-	JWS TokenType = "jws"
-	JWE TokenType = "jwe"
-)
-
-type AlgorithmType string
-
-const (
-	// JWS
-	HS256 AlgorithmType = "HS256"
-	RS256 AlgorithmType = "RS256"
-	None  AlgorithmType = "none"
-
-	// JWE
-	RSA_OAEP AlgorithmType = "RSA-OAEP"
-)
-
-type tokenInstance interface {
-	encode() ([]byte, error)
-	decode(parts []string) error
-	validate() (bool, error)
-}
-
-type Token struct {
-	TokenType
-	tokenInstance
-	Claims map[string]interface{}
-	Raw    []byte
-}
-
-func New(alg AlgorithmType, claims ClaimSet, key []byte) (*Token, error) {
-	var tokenType TokenType
-	if jwsAlgorithmsMap[alg] {
-		tokenType = JWS
-	} else if jweAlgorithmsMap[alg] {
-		tokenType = JWE
+func New(alg common.AlgorithmSuite, claims common.ClaimSet, key []byte) (*common.Token, error) {
+	var tokenType common.TokenType
+	if common.JwsAlgorithmsMap[alg.AlgorithmType] {
+		tokenType = common.JWS
+	} else if common.JweAlgorithmsMap[alg.AlgorithmType] {
+		tokenType = common.JWE
 	}
 
 	if tokenType == "" {
 		return nil, errors.New("invalid algorithm")
 	}
 
-	token := new(Token)
+	token := new(common.Token)
 	token.TokenType = tokenType
 	token.Raw = []byte{}
 	token.Claims = claims
 
 	switch token.TokenType {
-	case JWS:
-		jwsToken, err := newJwsToken(alg, claims, key)
+	case common.JWS:
+		jwsToken, err := jws.New(alg.AlgorithmType, claims, key)
 		if err != nil {
 			return nil, err
 		}
-		token.tokenInstance = jwsToken
+		token.TokenInstance = jwsToken
 		break
-	case JWE:
-		jweToken, err := newJweToken(alg, claims, key)
+	case common.JWE:
+		jweToken, err := jwe.New(alg, claims, key)
 		if err != nil {
 			return nil, err
 		}
-		token.tokenInstance = jweToken
+		token.TokenInstance = jweToken
 		break
 	}
 
 	return token, nil
 }
 
-func Encode(t *Token) ([]byte, error) {
+func Encode(t *common.Token) ([]byte, error) {
 	if t.Raw == nil || t.TokenType == "" {
 		return nil, errors.New("invalid token. make sure you call New before you call Encode")
 	}
 
 	var err error
 	switch t.TokenType {
-	case JWS:
-		tokenInstance, ok := t.tokenInstance.(*JwsToken)
+	case common.JWS:
+		tokenInstance, ok := t.TokenInstance.(*jws.Token)
 		if !ok {
 			return nil, errors.New("invalid token")
 		}
-		t.Raw, err = tokenInstance.encode()
-	case JWE:
-		tokenInstance, ok := t.tokenInstance.(*JweToken)
+		t.Raw, err = tokenInstance.Encode()
+	case common.JWE:
+		tokenInstance, ok := t.TokenInstance.(*jwe.Token)
 		if !ok {
 			return nil, errors.New("invalid token")
 		}
-		t.Raw, err = tokenInstance.encode()
+		t.Raw, err = tokenInstance.Encode()
 	}
 
 	if err != nil {
@@ -103,30 +74,30 @@ func Encode(t *Token) ([]byte, error) {
 	return t.Raw, nil
 }
 
-func Decode(tokenString string, key []byte) (*Token, error) {
-	token := Token{Raw: []byte(tokenString)}
+func Decode(tokenString string, key []byte) (*common.Token, error) {
+	token := common.Token{Raw: []byte(tokenString)}
 	jwtParts := strings.Split(tokenString, ".")
 	var err error
 
 	switch len(jwtParts) {
 	case 3:
-		token.TokenType = JWS
-		jwsToken := new(JwsToken)
-		jwsToken.key = key
-		token.tokenInstance = jwsToken
-		err = jwsToken.decode(jwtParts)
+		token.TokenType = common.JWS
+		jwsToken := new(jws.Token)
+		jwsToken.Key = key
+		token.TokenInstance = jwsToken
+		err = jwsToken.Decode(jwtParts)
 		if err != nil {
 			return nil, err
 		}
 		token.Claims = jwsToken.ClaimSet
 	case 5:
-		token.TokenType = JWE
-		tokenInstance, ok := token.tokenInstance.(*JweToken)
+		token.TokenType = common.JWE
+		tokenInstance, ok := token.TokenInstance.(*jwe.Token)
 		if !ok {
 			return nil, errors.New("invalid token")
 		}
 
-		err := tokenInstance.decode(jwtParts)
+		err := tokenInstance.Decode(jwtParts)
 		if err != nil {
 			return nil, err
 		}
@@ -137,19 +108,19 @@ func Decode(tokenString string, key []byte) (*Token, error) {
 	return &token, nil
 }
 
-func Validate(t *Token) (bool, error) {
+func Validate(t *common.Token) (bool, error) {
 	if t.Raw == nil {
 		return false, errors.New("jwt token is empty - you must call decode before validate")
 	}
 
 	switch t.TokenType {
-	case JWS:
-		tokenInstance, ok := t.tokenInstance.(*JwsToken)
+	case common.JWS:
+		tokenInstance, ok := t.TokenInstance.(*jws.Token)
 		if !ok {
 			return false, errors.New("invalid token")
 		}
-		return tokenInstance.validate()
-	case JWE:
+		return tokenInstance.Validate()
+	case common.JWE:
 		log.Fatal("JWE Not Implemented")
 	}
 

@@ -1,4 +1,4 @@
-package jwt
+package common
 
 import (
 	"encoding/base64"
@@ -6,33 +6,19 @@ import (
 	"errors"
 )
 
-var (
-	jwsAlgorithms    = []AlgorithmType{HS256, RS256, None}
-	jwsAlgorithmsMap = map[AlgorithmType]bool{
-		HS256: true,
-		RS256: true,
-		None:  true,
-	}
-
-	jweAlgorithms    = []AlgorithmType{RSA_OAEP}
-	jweAlgorithmsMap = map[AlgorithmType]bool{
-		RSA_OAEP: true,
-	}
-)
-
-func getTokenType(alg AlgorithmType) (TokenType, error) {
-	if jwsAlgorithmsMap[alg] {
+func GetTokenType(alg AlgorithmType) (TokenType, error) {
+	if JwsAlgorithmsMap[alg] {
 		return JWS, nil
 	}
 
-	if jweAlgorithmsMap[alg] {
+	if JweAlgorithmsMap[alg] {
 		return JWE, nil
 	}
 
 	return "", errors.New("unable to determine token type - check algorithm is supported")
 }
 
-func getAlgType(tokenType TokenType, headerPart string) (AlgorithmType, error) {
+func GetAlgType(tokenType TokenType, headerPart string) (AlgorithmType, error) {
 	if headerPart == "" || tokenType == "" {
 		return "", errors.New("arguments were invalid")
 	}
