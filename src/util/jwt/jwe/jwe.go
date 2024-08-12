@@ -90,13 +90,13 @@ func (t *Token) Decode(parts []string) error {
 		return fmt.Errorf("failed to decode JWS header: %w", err)
 	}
 
-	encryptedKeyBytes := []byte(parts[1])
+	encryptedKeyBytes, _ := base64.RawURLEncoding.DecodeString(parts[1])
 	t.encryptedKey = encryptedKeyBytes
 
-	ivBytes := []byte(parts[2])
+	ivBytes, _ := base64.RawURLEncoding.DecodeString(parts[2])
 	t.iv = ivBytes
 
-	cipherTextBytes := []byte(parts[3])
+	cipherTextBytes, _ := base64.RawURLEncoding.DecodeString(parts[3])
 	t.cipherText = cipherTextBytes
 
 	alg, err := t.Header.GetAlgorithm()

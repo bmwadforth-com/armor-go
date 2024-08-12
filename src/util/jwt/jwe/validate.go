@@ -60,6 +60,7 @@ func validateRSAOAEPA256GCM(t *Token) (bool, error) {
 		return false, fmt.Errorf("failed to decrypt payload: %w", err)
 	}
 
+	t.Payload.Raw = plaintext
 	err = t.Payload.UnmarshalJSON(plaintext)
 	if err != nil {
 		return false, err
