@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/bmwadforth-com/armor-go/compare/v0.3.2...v0.4.0) (2024-08-12)
+
+
+### Features
+
+* add jwe ([#15](https://github.com/bmwadforth-com/armor-go/issues/15)) ([cd3209b](https://github.com/bmwadforth-com/armor-go/commit/cd3209b085316827216feacbc87abc51915de3b7))
+
 ## [0.3.2](https://github.com/bmwadforth-com/armor-go/compare/v0.3.1...v0.3.2) (2024-08-12)
 
 
