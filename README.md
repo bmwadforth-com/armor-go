@@ -19,24 +19,49 @@ Here's an example on how you can use armor-go.
 package main
 
 import (
-	"fmt"
-	armor "github.com/bmwadforth-com/armor-go/src/util"
+   armor "github.com/bmwadforth-com/armor-go/src"
+   "github.com/bmwadforth-com/armor-go/src/util"
+   "github.com/bmwadforth-com/armor-go/src/util/jwt"
+   jwtCommon "github.com/bmwadforth-com/armor-go/src/util/jwt/common"
+   "os"
 )
 
+type Configuration struct {
+   DbConnString string `json:"db_conn_string"`
+   Keys         struct {
+      ApiKey            string `json:"api_key"`
+      JwePrivateKeyPath string `json:"jwe_private_key_path"`
+      JwePublicKeyPath  string `json:"jwe_public_key_path"`
+   } `json:"keys"`
+}
+
 func main() {
-	armor.InitLogger()
+   myConfig := Configuration{}
 
-	data := struct {
-		Name string `json:"name"`
-		Age  int    `json:"age"`
-	}{Name: "John", Age: 30}
+   _ = armor.InitArmor(false, myConfig, "/path/to/config/config.json")
+   defer armor.CleanupLogger(util.Logger)
 
-	result, err := armor.SerializeJson(data)
-	if err != nil {
-		// Handle error
-	}
+   key, _ := os.ReadFile(myConfig.Keys.JwePublicKeyPath)
+   claims := jwtCommon.NewClaimSet()
+   err := claims.Add(string(jwtCommon.Audience), "developers")
+   if err != nil {
+      util.LogError("error occurred adding claim: %v", err)
+   }
 
-	fmt.Println(result)
+   token, err := jwt.New(jwtCommon.AlgorithmSuite{
+      AlgorithmType:     jwtCommon.RSA_OAEP,
+      AuthAlgorithmType: jwtCommon.A256GCM,
+   }, claims, key)
+   if err != nil {
+      util.LogError("error occurred adding claim: %v", err)
+   }
+
+   encodedBytes, err := jwt.Encode(token)
+   if err != nil {
+      util.LogError("error occurred encoding token: %v", err)
+   }
+
+   util.Log("JWE Token: %s", string(encodedBytes))
 }
 
 ```
