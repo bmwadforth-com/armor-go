@@ -3,18 +3,21 @@ package crypto
 import (
 	"github.com/bmwadforth-com/armor-go/src/util"
 	"github.com/bmwadforth-com/armor-go/src/util/jwt"
+	"github.com/bmwadforth-com/armor-go/src/util/jwt/common"
 	"time"
 )
 
 func NewBearerToken(signingKey string) []byte {
 	key := []byte(signingKey)
 
-	claims := jwt.NewClaimSet()
-	claims.Add(string(jwt.Audience), "web-template")
-	claims.Add(string(jwt.Subject), "web-template")
-	claims.Add(string(jwt.IssuedAt), time.Now())
+	claims := common.NewClaimSet()
+	claims.Add(string(common.Audience), "web-template")
+	claims.Add(string(common.Subject), "web-template")
+	claims.Add(string(common.IssuedAt), time.Now())
 
-	token, err := jwt.New(jwt.HS256, claims, key)
+	token, err := jwt.New(common.AlgorithmSuite{
+		AlgorithmType: common.HS256,
+	}, claims, key)
 	if err != nil {
 		util.LogError("unable to create token: %v", err)
 		return nil
