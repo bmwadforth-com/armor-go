@@ -6,7 +6,7 @@ import (
 )
 
 func (p *Payload) toJson() ([]byte, error) {
-	jsonBytes, err := json.Marshal(p.Claims)
+	jsonBytes, err := json.Marshal(p.ClaimSet)
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +28,7 @@ func (p *Payload) toBase64() ([]byte, error) {
 }
 
 func (p *Payload) fromJson(b []byte) (*Payload, error) {
-	err := json.Unmarshal(b, &p.Claims)
+	err := json.Unmarshal(b, &p.ClaimSet)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func (p *Payload) fromBase64(b []byte) (*Payload, error) {
 		return nil, err
 	}
 
-	err = json.Unmarshal(jsonBytes, &p.Claims)
+	err = json.Unmarshal(jsonBytes, &p.ClaimSet)
 	if err != nil {
 		return nil, err
 	}

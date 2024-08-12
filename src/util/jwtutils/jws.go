@@ -118,7 +118,7 @@ func (t *JwsToken) validate() (bool, error) {
 	}
 
 	//TODO: ValidateJws more claims
-	exp, ok := t.Claims[string(ExpirationTime)]
+	exp, ok := t.ClaimSet[string(ExpirationTime)]
 	if ok {
 		claim := exp.(string)
 		expiration, err := time.Parse(time.RFC3339, claim)

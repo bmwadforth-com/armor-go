@@ -53,7 +53,7 @@ func New(alg AlgorithmType, claims ClaimSet, key []byte) (*Token, error) {
 	token := new(Token)
 	token.TokenType = tokenType
 	token.Raw = []byte{}
-	token.Claims = claims.Claims
+	token.Claims = claims
 
 	switch token.TokenType {
 	case JWS:
@@ -118,7 +118,7 @@ func Decode(tokenString string, key []byte) (*Token, error) {
 		if err != nil {
 			return nil, err
 		}
-		token.Claims = jwsToken.Claims
+		token.Claims = jwsToken.ClaimSet
 	case 5:
 		token.TokenType = JWE
 		tokenInstance, ok := token.tokenInstance.(*JweToken)
