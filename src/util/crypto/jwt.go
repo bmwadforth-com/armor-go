@@ -1,8 +1,8 @@
-package cryptoutils
+package crypto
 
 import (
 	"github.com/bmwadforth-com/armor-go/src/util"
-	"github.com/bmwadforth-com/armor-go/src/util/jwtutils"
+	"github.com/bmwadforth-com/armor-go/src/util/jwt"
 	"time"
 )
 

@@ -1,7 +1,7 @@
 package cryptoutils_test
 
 import (
-	"github.com/bmwadforth-com/armor-go/src/util/cryptoutils"
+	"github.com/bmwadforth-com/armor-go/src/util/crypto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -17,7 +17,7 @@ func TestGenerateSha1Hash(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		result, _ := cryptoutils.GenerateSha1Hash(tc.input)
+		result, _ := crypto.GenerateSha1Hash(tc.input)
 		assert.Equal(t, tc.expected, result, "Incorrect SHA1 hash")
 	}
 }
@@ -25,17 +25,17 @@ func TestGenerateSha1Hash(t *testing.T) {
 func TestHashPassword(t *testing.T) {
 	password := []byte("testpassword")
 
-	_, err := cryptoutils.HashPassword(password)
+	_, err := crypto.HashPassword(password)
 	require.NoError(t, err, "Hashing the password should not produce an error")
 }
 
 func TestPasswordHashMatch(t *testing.T) {
 	password := []byte("testpassword")
-	hashedPassword, _ := cryptoutils.HashPassword(password)
+	hashedPassword, _ := crypto.HashPassword(password)
 
-	case1, _ := cryptoutils.PasswordHashMatch(hashedPassword, password)
-	case2, _ := cryptoutils.PasswordHashMatch(hashedPassword, []byte("wrongpassword"))
-	case3, _ := cryptoutils.PasswordHashMatch([]byte("invalid"), password)
+	case1, _ := crypto.PasswordHashMatch(hashedPassword, password)
+	case2, _ := crypto.PasswordHashMatch(hashedPassword, []byte("wrongpassword"))
+	case3, _ := crypto.PasswordHashMatch([]byte("invalid"), password)
 
 	assert.True(t, case1, "Passwords should match")
 

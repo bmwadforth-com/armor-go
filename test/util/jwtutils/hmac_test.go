@@ -3,7 +3,7 @@ package jwtutils
 import (
 	"errors"
 	"fmt"
-	jwt "github.com/bmwadforth-com/armor-go/src/util/jwtutils"
+	jwt "github.com/bmwadforth-com/armor-go/src/util/jwt"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
