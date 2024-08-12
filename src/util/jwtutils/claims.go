@@ -5,11 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
 )
 
-type ClaimSet struct {
-	Claims map[string]interface{}
-}
+type ClaimSet map[string]interface{}
 type RegisteredClaim string
 
 const (
@@ -23,24 +22,24 @@ const (
 )
 
 func NewClaimSet() ClaimSet {
-	return ClaimSet{Claims: map[string]interface{}{}}
+	return ClaimSet{}
 }
 
 func (c *ClaimSet) Add(key string, value interface{}) error {
-	_, found := c.Claims[key]
+	_, found := (*c)[key]
 	if found {
 		return errors.New("duplicate claims are forbidden")
 	}
 
-	c.Claims[key] = value
+	(*c)[key] = value
 
 	return nil
 }
 
 func (c *ClaimSet) Remove(key string) error {
-	_, found := c.Claims[key]
+	_, found := (*c)[key]
 	if found {
-		delete(c.Claims, key)
+		delete(*c, key)
 	} else {
 		return errors.New(fmt.Sprintf("key: %s was not found in claim set", key))
 	}
@@ -61,8 +60,46 @@ func getClaims(payloadPart string) (ClaimSet, error) {
 	}
 
 	for key, value := range claims {
-		claimSet.Claims[key] = value
+		claimSet[key] = value
 	}
 
 	return claimSet, nil
+}
+
+// MarshalJSON implements the json.Marshaler interface
+func (c *ClaimSet) MarshalJSON() ([]byte, error) {
+	keys := make([]string, 0, len(*c))
+	for k := range *c {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	sortedClaims := make(map[string]interface{})
+	for _, k := range keys {
+		sortedClaims[k] = (*c)[k]
+	}
+
+	return json.Marshal(sortedClaims)
+}
+
+// UnmarshalJSON implements the json.Unmarshaler interface
+func (c *ClaimSet) UnmarshalJSON(data []byte) error {
+	var tempMap map[string]interface{}
+	if err := json.Unmarshal(data, &tempMap); err != nil {
+		return fmt.Errorf("failed to unmarshal JSON: %w", err)
+	}
+
+	if *c == nil {
+		*c = make(map[string]interface{})
+	} else {
+		for k := range *c {
+			delete(*c, k)
+		}
+	}
+
+	for k, v := range tempMap {
+		(*c)[k] = v
+	}
+
+	return nil
 }

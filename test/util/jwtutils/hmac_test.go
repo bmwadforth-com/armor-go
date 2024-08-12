@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	jwt "github.com/bmwadforth-com/armor-go/src/util/jwtutils"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -55,4 +56,16 @@ func TestValidateHMAC(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+func TestDecodesOrderCorrectly(t *testing.T) {
+	key := []byte("TEST")
+	tokenString := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJkZXZlbG9wZXJzIiwiZGF0YSI6eyJmaXJzdF9uYW1lIjoiQnJhbm5vbiIsImxhc3RfbmFtZSI6IldhZGZvcnRoIn19.jEdsKOemSNO69yjItOROWNwPU2tvwrCG1H_rdLQRtzg"
+
+	token, err := jwt.Decode(tokenString, key)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, tokenString, string(token.Raw))
 }
