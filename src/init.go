@@ -3,7 +3,7 @@ package armor
 import (
 	"context"
 	"github.com/bmwadforth-com/armor-go/src/util"
-	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"os"
 )
 
@@ -12,14 +12,14 @@ var (
 	IsRelease    bool
 	InitCalled   bool
 
-	CleanupLogger func(*zap.Logger)
+	CleanupLogger func()
 )
 
-func InitArmor[T util.Configuration](isRelease bool, config T, configPath string) error {
+func InitArmor[T util.Configuration](isRelease bool, minLevel zapcore.Level, config T, configPath string) error {
 	ArmorContext = context.Background()
 	IsRelease = isRelease
 	InitCalled = true
-	CleanupLogger = util.InitLogger()
+	CleanupLogger = util.InitLogger(isRelease, minLevel)
 
 	if IsRelease || os.Getenv("APP_ENV") == "PRODUCTION" {
 		err := util.LoadEnvironmentVariables(config)
