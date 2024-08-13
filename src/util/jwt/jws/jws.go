@@ -89,11 +89,11 @@ func (t *Token) Decode(parts []string) error {
 		Bytes: []byte(parts[2]),
 	}
 
-	alg, err := common.GetAlgType(common.JWS, parts[0])
+	alg, err := t.Header.GetAlgorithm()
 	if err != nil {
 		return err
 	}
-	t.Raw = []byte(fmt.Sprintf("%s.%s.%s", t.Header.Metadata.Bytes, t.Payload.Metadata.Bytes, t.Signature.Metadata.Bytes))
+	t.Raw = []byte(fmt.Sprintf("%s.%s.%s", t.Header.Metadata.Base64, t.Payload.Metadata.Base64, t.Signature.Metadata.Base64))
 	t.SignFunc = getJwsSignFunc(alg)
 	t.ValidateFunc = getJwsValidateFunc(alg)
 
