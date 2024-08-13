@@ -116,14 +116,21 @@ func Validate(t *common.Token) (bool, error) {
 		if !ok {
 			return false, errors.New("invalid token")
 		}
-		return tokenInstance.Validate()
+		ok, err := tokenInstance.Validate()
+		if !ok {
+			return false, err
+		}
 	case common.JWE:
 		tokenInstance, ok := t.TokenInstance.(*jwe.Token)
 		if !ok {
 			return false, errors.New("invalid token")
 		}
-		return tokenInstance.Validate()
+		ok, err := tokenInstance.Validate()
+		if !ok {
+			return false, err
+		}
+		t.Claims = tokenInstance.Payload.ClaimSet
 	}
 
-	return false, errors.New("unable to decode - please check algorithm")
+	return true, nil
 }

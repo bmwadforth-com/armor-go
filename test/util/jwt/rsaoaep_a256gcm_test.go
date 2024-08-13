@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"errors"
 	"fmt"
 	"github.com/bmwadforth-com/armor-go/src/util/jwt"
 	"github.com/bmwadforth-com/armor-go/src/util/jwt/common"
@@ -54,5 +55,9 @@ func TestValidateRSAOAEP_With_A256GCM(t *testing.T) {
 	_, err = jwt.Validate(token)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	if token.Claims[string(common.Audience)] != "developers" {
+		t.Fatal(errors.New("claims not decoded correctly"))
 	}
 }
