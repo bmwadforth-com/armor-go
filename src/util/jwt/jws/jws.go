@@ -56,18 +56,18 @@ func (t *Token) Encode() ([]byte, error) {
 		return nil, fmt.Errorf("failed to encode payload: %w", err)
 	}
 
-	dataToSign := fmt.Sprintf("%s.%s", t.Header.Metadata, t.Payload.Metadata)
+	dataToSign := fmt.Sprintf("%s.%s", t.Header.Metadata.Base64, t.Payload.Metadata.Base64)
 	signature, err := t.SignFunc(t, []byte(dataToSign))
 	if err != nil {
 		return nil, fmt.Errorf("failed to sign JWT: %w", err)
 	}
 	signatureB64 := base64.RawURLEncoding.EncodeToString(signature)
 	t.Signature.Metadata = &common.Metadata{
-		Bytes:  []byte(signatureB64),
+		Bytes:  signature,
 		Base64: signatureB64,
 	}
 
-	t.Raw = []byte(fmt.Sprintf("%s.%s.%s", t.Header.Metadata, t.Payload.Metadata, t.Signature.Metadata))
+	t.Raw = []byte(fmt.Sprintf("%s.%s.%s", t.Header.Metadata.Base64, t.Payload.Metadata.Base64, t.Signature.Metadata.Base64))
 
 	return t.Raw, nil
 }
@@ -93,7 +93,7 @@ func (t *Token) Decode(parts []string) error {
 	if err != nil {
 		return err
 	}
-	t.Raw = []byte(fmt.Sprintf("%s.%s.%s", t.Header.Metadata, t.Payload.Metadata, t.Signature.Metadata))
+	t.Raw = []byte(fmt.Sprintf("%s.%s.%s", t.Header.Metadata.Bytes, t.Payload.Metadata.Bytes, t.Signature.Metadata.Bytes))
 	t.SignFunc = getJwsSignFunc(alg)
 	t.ValidateFunc = getJwsValidateFunc(alg)
 
