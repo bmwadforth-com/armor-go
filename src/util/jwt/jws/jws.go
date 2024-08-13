@@ -18,7 +18,7 @@ type Token struct {
 	SignFunc
 	ValidateFunc
 	Key []byte
-	Raw []byte
+	Raw string
 }
 
 func New(alg common.AlgorithmType, claims common.ClaimSet, key []byte) (*Token, error) {
@@ -40,26 +40,26 @@ func New(alg common.AlgorithmType, claims common.ClaimSet, key []byte) (*Token, 
 	t.SignFunc = getJwsSignFunc(alg)
 	t.ValidateFunc = getJwsValidateFunc(alg)
 	t.Key = key
-	t.Raw = []byte{}
+	t.Raw = ""
 
 	return t, nil
 }
 
-func (t *Token) Encode() ([]byte, error) {
+func (t *Token) Encode() (string, error) {
 	var err error
 	_, err = t.Header.Serialize()
 	if err != nil {
-		return nil, fmt.Errorf("failed to encode header: %w", err)
+		return "", fmt.Errorf("failed to encode header: %w", err)
 	}
 	_, err = t.Payload.Serialize()
 	if err != nil {
-		return nil, fmt.Errorf("failed to encode payload: %w", err)
+		return "", fmt.Errorf("failed to encode payload: %w", err)
 	}
 
 	dataToSign := fmt.Sprintf("%s.%s", t.Header.Metadata.Base64, t.Payload.Metadata.Base64)
 	signature, err := t.SignFunc(t, []byte(dataToSign))
 	if err != nil {
-		return nil, fmt.Errorf("failed to sign JWT: %w", err)
+		return "", fmt.Errorf("failed to sign JWT: %w", err)
 	}
 	signatureB64 := base64.RawURLEncoding.EncodeToString(signature)
 	t.Signature.Metadata = &common.Metadata{
@@ -67,7 +67,7 @@ func (t *Token) Encode() ([]byte, error) {
 		Base64: signatureB64,
 	}
 
-	t.Raw = []byte(fmt.Sprintf("%s.%s.%s", t.Header.Metadata.Base64, t.Payload.Metadata.Base64, t.Signature.Metadata.Base64))
+	t.Raw = fmt.Sprintf("%s.%s.%s", t.Header.Metadata.Base64, t.Payload.Metadata.Base64, t.Signature.Metadata.Base64)
 
 	return t.Raw, nil
 }
@@ -90,7 +90,7 @@ func (t *Token) Decode(parts []string) error {
 	if err != nil {
 		return fmt.Errorf("failed to decode JWS signature: %w", err)
 	}
-	
+
 	t.Signature.Metadata = &common.Metadata{
 		Bytes:  decodedSignature,
 		Base64: parts[2],
@@ -100,7 +100,7 @@ func (t *Token) Decode(parts []string) error {
 	if err != nil {
 		return err
 	}
-	t.Raw = []byte(fmt.Sprintf("%s.%s.%s", headerBytes, payloadBytes, signatureBytes))
+	t.Raw = fmt.Sprintf("%s.%s.%s", headerBytes, payloadBytes, signatureBytes)
 	t.SignFunc = getJwsSignFunc(alg)
 	t.ValidateFunc = getJwsValidateFunc(alg)
 

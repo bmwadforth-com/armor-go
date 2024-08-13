@@ -44,7 +44,7 @@ func validateRSAOAEPA256GCM(t *Token) (bool, error) {
 }
 
 func decryptJWE(t *Token, privateKey *rsa.PrivateKey) ([]byte, error) {
-	parts := strings.Split(string(t.Raw), ".")
+	parts := strings.Split(t.Raw, ".")
 	if len(parts) != 5 {
 		return nil, fmt.Errorf("invalid JWE format")
 	}
