@@ -1,13 +1,12 @@
-package crypto
+package util
 
 import (
-	"github.com/bmwadforth-com/armor-go/src/util"
 	"github.com/bmwadforth-com/armor-go/src/util/jwt"
 	"github.com/bmwadforth-com/armor-go/src/util/jwt/common"
 	"time"
 )
 
-func NewBearerToken(signingKey string) []byte {
+func NewBearerToken(signingKey string) ([]byte, error) {
 	key := []byte(signingKey)
 
 	claims := common.NewClaimSet()
@@ -19,45 +18,40 @@ func NewBearerToken(signingKey string) []byte {
 		AlgorithmType: common.HS256,
 	}, claims, key)
 	if err != nil {
-		util.LogError("unable to create token: %v", err)
-		return nil
+		return nil, err
 	}
 
 	tokenBytes, err := jwt.Encode(token)
 	if err != nil {
-		util.LogError("unable to encode token: %v", err)
-		return nil
+		return nil, err
 	}
 
-	return tokenBytes
+	return tokenBytes, nil
 }
 
-func ValidateBearerToken(tokenString string, signingKey string) bool {
+func ValidateBearerToken(tokenString string, signingKey string) (bool, error) {
 	key := []byte(signingKey)
 
 	token, err := jwt.Decode(tokenString, key)
 	if err != nil {
-		util.LogError("unable to parse token: %v", err)
-		return false
+		return false, err
 	}
 
 	_, err = jwt.Validate(token)
 	if err != nil {
-		util.LogError("unable to validate token: %v", err)
-		return false
+		return false, err
 	}
 
-	return true
+	return true, nil
 }
 
-func GetTokenClaims(tokenString string, signingKey string) map[string]interface{} {
+func GetTokenClaims(tokenString string, signingKey string) (map[string]interface{}, error) {
 	key := []byte(signingKey)
 
 	token, err := jwt.Decode(tokenString, key)
 	if err != nil {
-		util.LogError("unable to parse token claims: %v", err)
-		return nil
+		return nil, err
 	}
 
-	return token.Claims
+	return token.Claims, nil
 }
