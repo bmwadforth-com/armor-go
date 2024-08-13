@@ -35,8 +35,7 @@ func validateRSAOAEPA256GCM(t *Token) (bool, error) {
 		return false, err
 	}
 
-	t.Payload.Raw = plaintext
-	err = t.Payload.UnmarshalJSON(plaintext)
+	_, err = t.Payload.Deserialize(plaintext)
 	if err != nil {
 		return false, err
 	}
@@ -65,7 +64,7 @@ func decryptJWE(t *Token, privateKey *rsa.PrivateKey) ([]byte, error) {
 	}
 
 	ciphertextWithTag := append(t.cipherText, t.authTag...)
-	plaintext, err := aesGCM.Open(nil, t.iv, ciphertextWithTag, t.Header.Raw)
+	plaintext, err := aesGCM.Open(nil, t.iv, ciphertextWithTag, t.Header.Metadata.Bytes)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decrypt payload: %w", err)
 	}

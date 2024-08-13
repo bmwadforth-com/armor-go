@@ -5,46 +5,38 @@ import (
 	"encoding/json"
 )
 
-func (p *Payload) toJson() ([]byte, error) {
-	jsonBytes, err := json.Marshal(p.ClaimSet)
-	if err != nil {
-		return nil, err
-	}
-
-	return jsonBytes, nil
-}
-
-func (p *Payload) ToBase64() ([]byte, error) {
-	jsonBytes, err := p.toJson()
+func (p *Payload) Serialize() ([]byte, error) {
+	jsonBytes, err := json.Marshal(p.Data)
 	if err != nil {
 		return nil, err
 	}
 
 	b64Bytes := base64.RawURLEncoding.EncodeToString(jsonBytes)
 
-	p.Raw = []byte(b64Bytes)
+	p.Metadata = &Metadata{
+		Bytes:  jsonBytes,
+		Base64: b64Bytes,
+		Json:   string(jsonBytes),
+	}
 
 	return []byte(b64Bytes), nil
 }
 
-func (p *Payload) fromJson(b []byte) (*Payload, error) {
-	err := json.Unmarshal(b, &p.ClaimSet)
-	if err != nil {
-		return nil, err
-	}
-
-	return p, nil
-}
-
-func (p *Payload) FromBase64(b []byte) (*Payload, error) {
+func (p *Payload) Deserialize(b []byte) (*Payload, error) {
 	jsonBytes, err := base64.RawURLEncoding.DecodeString(string(b))
 	if err != nil {
 		return nil, err
 	}
 
-	err = json.Unmarshal(jsonBytes, &p.ClaimSet)
+	err = json.Unmarshal(jsonBytes, &p.Data)
 	if err != nil {
 		return nil, err
+	}
+
+	p.Metadata = &Metadata{
+		Bytes:  b,
+		Base64: string(b),
+		Json:   string(jsonBytes),
 	}
 
 	return p, nil

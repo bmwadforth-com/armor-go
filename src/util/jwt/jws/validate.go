@@ -51,12 +51,12 @@ func validateRSA256(t *Token) (bool, error) {
 		return false, err
 	}
 
-	headerB64, _ := t.Header.ToBase64()
-	payloadB64, _ := t.Payload.ToBase64()
+	headerB64, _ := t.Header.Serialize()
+	payloadB64, _ := t.Payload.Serialize()
 
 	hashed := sha256.Sum256([]byte(fmt.Sprintf("%s.%s", headerB64, payloadB64)))
 
-	decodedSignature, err := base64.RawURLEncoding.DecodeString(string(t.Signature.Raw))
+	decodedSignature, err := base64.RawURLEncoding.DecodeString(t.Signature.Metadata.Base64)
 	if err != nil {
 		return false, err
 	}

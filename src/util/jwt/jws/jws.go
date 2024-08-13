@@ -24,18 +24,18 @@ type Token struct {
 func New(alg common.AlgorithmType, claims common.ClaimSet, key []byte) (*Token, error) {
 	t := new(Token)
 	t.Header = common.Header{
-		Properties: map[string]interface{}{
+		Data: map[string]interface{}{
 			"alg": alg,
 			"typ": "JWT",
 		},
-		Raw: []byte{},
+		Metadata: &common.Metadata{},
 	}
 	t.Payload = common.Payload{
-		ClaimSet: claims,
-		Raw:      []byte{},
+		Data:     claims,
+		Metadata: &common.Metadata{},
 	}
 	t.Signature = common.Signature{
-		Raw: []byte{},
+		Metadata: &common.Metadata{},
 	}
 	t.SignFunc = getJwsSignFunc(alg)
 	t.ValidateFunc = getJwsValidateFunc(alg)
@@ -47,50 +47,53 @@ func New(alg common.AlgorithmType, claims common.ClaimSet, key []byte) (*Token, 
 
 func (t *Token) Encode() ([]byte, error) {
 	var err error
-	t.Header.Raw, err = t.Header.ToBase64()
+	_, err = t.Header.Serialize()
 	if err != nil {
 		return nil, fmt.Errorf("failed to encode header: %w", err)
 	}
-	t.Payload.Raw, err = t.Payload.ToBase64()
+	_, err = t.Payload.Serialize()
 	if err != nil {
 		return nil, fmt.Errorf("failed to encode payload: %w", err)
 	}
 
-	dataToSign := fmt.Sprintf("%s.%s", t.Header.Raw, t.Payload.Raw)
+	dataToSign := fmt.Sprintf("%s.%s", t.Header.Metadata, t.Payload.Metadata)
 	signature, err := t.SignFunc(t, []byte(dataToSign))
 	if err != nil {
 		return nil, fmt.Errorf("failed to sign JWT: %w", err)
 	}
 	signatureB64 := base64.RawURLEncoding.EncodeToString(signature)
-	t.Signature.Raw = []byte(signatureB64)
+	t.Signature.Metadata = &common.Metadata{
+		Bytes:  []byte(signatureB64),
+		Base64: signatureB64,
+	}
 
-	t.Raw = []byte(fmt.Sprintf("%s.%s.%s", t.Header.Raw, t.Payload.Raw, t.Signature.Raw))
+	t.Raw = []byte(fmt.Sprintf("%s.%s.%s", t.Header.Metadata, t.Payload.Metadata, t.Signature.Metadata))
 
 	return t.Raw, nil
 }
 
 func (t *Token) Decode(parts []string) error {
 	headerBytes := []byte(parts[0])
-	t.Header.Raw = headerBytes
-	_, err := t.Header.FromBase64(headerBytes)
+	_, err := t.Header.Deserialize(headerBytes)
 	if err != nil {
 		return fmt.Errorf("failed to decode JWS header: %w", err)
 	}
 
 	payloadBytes := []byte(parts[1])
-	t.Payload.Raw = payloadBytes
-	_, err = t.Payload.FromBase64(payloadBytes)
+	_, err = t.Payload.Deserialize(payloadBytes)
 	if err != nil {
 		return fmt.Errorf("failed to decode JWS payload: %w", err)
 	}
 
-	t.Signature.Raw = []byte(parts[2])
+	t.Signature.Metadata = &common.Metadata{
+		Bytes: []byte(parts[2]),
+	}
 
 	alg, err := common.GetAlgType(common.JWS, parts[0])
 	if err != nil {
 		return err
 	}
-	t.Raw = []byte(fmt.Sprintf("%s.%s.%s", t.Header.Raw, t.Payload.Raw, t.Signature.Raw))
+	t.Raw = []byte(fmt.Sprintf("%s.%s.%s", t.Header.Metadata, t.Payload.Metadata, t.Signature.Metadata))
 	t.SignFunc = getJwsSignFunc(alg)
 	t.ValidateFunc = getJwsValidateFunc(alg)
 
@@ -108,7 +111,7 @@ func (t *Token) Validate() (bool, error) {
 	}
 
 	//TODO: ValidateJws more claims
-	exp, ok := t.Payload.ClaimSet[string(common.ExpirationTime)]
+	exp, ok := t.Payload.Data[string(common.ExpirationTime)]
 	if ok {
 		claim := exp.(string)
 		expiration, err := time.Parse(time.RFC3339, claim)

@@ -44,25 +44,31 @@ var (
 	}
 )
 
+type Metadata struct {
+	Bytes  []byte
+	Base64 string
+	Json   string
+}
+
 type Header struct {
-	Properties map[string]interface{}
-	Raw        []byte
+	Data     map[string]interface{}
+	Metadata *Metadata
 }
 
 type Payload struct {
-	ClaimSet
-	Raw []byte
+	Data     ClaimSet
+	Metadata *Metadata
 }
 
 type Signature struct {
-	Raw []byte
+	Metadata *Metadata
 }
 
 type Token struct {
-	TokenType
-	TokenInstance
-	Claims map[string]interface{}
-	Raw    []byte
+	TokenType     TokenType
+	TokenInstance TokenInstance
+	Claims        map[string]interface{}
+	Metadata      *Metadata
 }
 
 // TokenInstance represents an interface for working with tokens.
@@ -73,9 +79,9 @@ type TokenInstance interface {
 	Encode() ([]byte, error)
 
 	// Decode parses a serialized token (split into its parts) and populates the internal token structure.
-	// For JWS, the header, payload, SignFunc and ValidateFunc are all populated (along with Raw byte values).
+	// For JWS, the header, payload, SignFunc and ValidateFunc are all populated (along with Metadata byte values).
 	// For JWE, the header, encryptedKey, initialization vector, cipher text, SignFunc and Validate func are
-	// all populated (along with Raw byte values).
+	// all populated (along with Metadata byte values).
 	// It takes the token parts as input and returns an error if the decoding or parsing process fails.
 	Decode(parts []string) error
 

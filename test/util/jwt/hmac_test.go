@@ -16,14 +16,14 @@ func TestEncodeHMAC(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	token, err := jwt.New(common.AlgorithmSuite{
+	token, err := jwt.new(common.AlgorithmSuite{
 		AlgorithmType: common.HS256,
 	}, claims, key)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_, err = jwt.Encode(token)
+	_, err = jwt.encodeToken(token)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -33,7 +33,7 @@ func TestDecodeHMAC(t *testing.T) {
 	key := []byte("TEST")
 	tokenString := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJkZXZlbG9wZXJzIn0.4kNVyvKLfe6fuioUgM3rbWZ2PRQXRwYcC0c6cCQclGo"
 
-	token, err := jwt.Decode(tokenString, key)
+	token, err := jwt.decodeToken(tokenString, key)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -47,12 +47,12 @@ func TestValidateHMAC(t *testing.T) {
 	key := []byte("TEST")
 	tokenString := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJkZXZlbG9wZXJzIn0.4kNVyvKLfe6fuioUgM3rbWZ2PRQXRwYcC0c6cCQclGo"
 
-	token, err := jwt.Decode(tokenString, key)
+	token, err := jwt.decodeToken(tokenString, key)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_, err = jwt.Validate(token)
+	_, err = jwt.validateToken(token)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -62,10 +62,10 @@ func TestDecodesOrderCorrectly(t *testing.T) {
 	key := []byte("TEST")
 	tokenString := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJkZXZlbG9wZXJzIiwiZGF0YSI6eyJmaXJzdF9uYW1lIjoiQnJhbm5vbiIsImxhc3RfbmFtZSI6IldhZGZvcnRoIn19.jEdsKOemSNO69yjItOROWNwPU2tvwrCG1H_rdLQRtzg"
 
-	token, err := jwt.Decode(tokenString, key)
+	token, err := jwt.decodeToken(tokenString, key)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	assert.Equal(t, tokenString, string(token.Raw))
+	assert.Equal(t, tokenString, string(token.Metadata))
 }

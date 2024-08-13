@@ -31,19 +31,19 @@ type Token struct {
 func New(alg common.AlgorithmSuite, claims common.ClaimSet, publicKey []byte) (*Token, error) {
 	t := new(Token)
 	t.Header = common.Header{
-		Properties: map[string]interface{}{
+		Data: map[string]interface{}{
 			"alg": alg.AlgorithmType,
 			"enc": alg.AuthAlgorithmType,
 			"typ": "JWT",
 		},
-		Raw: []byte{},
+		Metadata: &common.Metadata{},
 	}
 	t.Payload = common.Payload{
-		ClaimSet: claims,
-		Raw:      []byte{},
+		Data:     claims,
+		Metadata: &common.Metadata{},
 	}
 	t.SignFunc = getJweSignFunc(alg)
-	//TODO: t.ValidateFunc = getJweValidateFunc(alg)
+	t.ValidateFunc = getJweValidateFunc(alg)
 
 	t.Raw = []byte{}
 	t.PublicKey = publicKey
@@ -53,23 +53,23 @@ func New(alg common.AlgorithmSuite, claims common.ClaimSet, publicKey []byte) (*
 
 func (t *Token) Encode() ([]byte, error) {
 	var err error
-	t.Header.Raw, err = t.Header.ToBase64()
+	_, err = t.Header.Serialize()
 	if err != nil {
 		return nil, fmt.Errorf("failed to encode header: %w", err)
 	}
 
-	t.Payload.Raw, err = t.Payload.MarshalJSON()
+	_, err = t.Payload.Serialize()
 	if err != nil {
 		return nil, fmt.Errorf("failed to encode payload: %w", err)
 	}
 
-	_, err = t.SignFunc(t, t.Payload.Raw)
+	_, err = t.SignFunc(t, t.Payload.Metadata.Bytes)
 	if err != nil {
 		return nil, fmt.Errorf("failed to sign JWT: %w", err)
 	}
 
 	parts := []string{
-		fmt.Sprintf("%s", t.Header.Raw),
+		fmt.Sprintf("%s", t.Header.Metadata),
 		base64.RawURLEncoding.EncodeToString(t.encryptedKey),
 		base64.RawURLEncoding.EncodeToString(t.iv),
 		base64.RawURLEncoding.EncodeToString(t.cipherText),
@@ -84,8 +84,7 @@ func (t *Token) Encode() ([]byte, error) {
 
 func (t *Token) Decode(parts []string) error {
 	headerBytes := []byte(parts[0])
-	t.Header.Raw = headerBytes
-	_, err := t.Header.FromBase64(headerBytes)
+	_, err := t.Header.Deserialize(headerBytes)
 	if err != nil {
 		return fmt.Errorf("failed to decode JWS header: %w", err)
 	}
@@ -107,7 +106,7 @@ func (t *Token) Decode(parts []string) error {
 		return err
 	}
 
-	authAlg, err := t.Header.GetAuthAlgorithm()
+	authAlg, err := t.Header.GetEncryptionAlgorithm()
 	if err != nil {
 		return err
 	}
@@ -135,7 +134,7 @@ func (t *Token) Validate() (bool, error) {
 	}
 
 	//TODO: ValidateJws more claims
-	exp, ok := t.Payload.ClaimSet[string(common.ExpirationTime)]
+	exp, ok := t.Payload.Data[string(common.ExpirationTime)]
 	if ok {
 		claim := exp.(string)
 		expiration, err := time.Parse(time.RFC3339, claim)
