@@ -33,7 +33,6 @@ func validateRSAOAEPA256GCM(t *Token) (bool, error) {
 	privateKey, err := x509.ParsePKCS8PrivateKey(pemBlock.Bytes)
 	if err != nil {
 		return false, fmt.Errorf("failed to parse private key: %w", err)
-
 	}
 
 	parts := strings.Split(string(t.Raw), ".")
@@ -55,7 +54,8 @@ func validateRSAOAEPA256GCM(t *Token) (bool, error) {
 		return false, fmt.Errorf("failed to create GCM: %w", err)
 	}
 
-	plaintext, err := aesGCM.Open(nil, t.iv, t.cipherText, nil)
+	ciphertextWithTag := append(t.cipherText, t.authTag...)
+	plaintext, err := aesGCM.Open(nil, t.iv, ciphertextWithTag, t.Header.Raw)
 	if err != nil {
 		return false, fmt.Errorf("failed to decrypt payload: %w", err)
 	}

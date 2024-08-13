@@ -24,7 +24,7 @@ func getJweSignFunc(a common.AlgorithmSuite) SignFunc {
 	return nil
 }
 
-func signRSAOAEPA256GCM(t *Token, signingInput []byte) ([]byte, error) {
+func signRSAOAEPA256GCM(t *Token, plaintext []byte) ([]byte, error) {
 	keySize, err := t.Header.GetAuthAlgorithm()
 	if err != nil {
 		return nil, err
@@ -65,12 +65,16 @@ func signRSAOAEPA256GCM(t *Token, signingInput []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	ciphertext := aesGCM.Seal(nil, nonce, signingInput, nil)
+
+	ciphertextWithTag := aesGCM.Seal(nil, nonce, plaintext, t.Header.Raw)
+	tagSize := aesGCM.Overhead()
+	ciphertext := ciphertextWithTag[:len(ciphertextWithTag)-tagSize]
+	authTag := ciphertextWithTag[len(ciphertextWithTag)-tagSize:]
 
 	t.encryptedKey = encryptedKey
 	t.iv = nonce
 	t.cipherText = ciphertext
-	t.authTag = []byte("")
+	t.authTag = authTag
 
 	return encryptedKey, nil
 }

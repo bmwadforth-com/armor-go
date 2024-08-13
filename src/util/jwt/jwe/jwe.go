@@ -73,7 +73,7 @@ func (t *Token) Encode() ([]byte, error) {
 		base64.RawURLEncoding.EncodeToString(t.encryptedKey),
 		base64.RawURLEncoding.EncodeToString(t.iv),
 		base64.RawURLEncoding.EncodeToString(t.cipherText),
-		"", // Empty authentication tag (not calculated here)
+		base64.RawURLEncoding.EncodeToString(t.authTag),
 	}
 
 	jwe := strings.Join(parts, ".")
@@ -98,6 +98,9 @@ func (t *Token) Decode(parts []string) error {
 
 	cipherTextBytes, _ := base64.RawURLEncoding.DecodeString(parts[3])
 	t.cipherText = cipherTextBytes
+
+	authTagBytes, _ := base64.RawURLEncoding.DecodeString(parts[4])
+	t.authTag = authTagBytes
 
 	alg, err := t.Header.GetAlgorithm()
 	if err != nil {
