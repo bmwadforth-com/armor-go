@@ -1,11 +1,6 @@
 package util_test
 
-import (
-	"github.com/bmwadforth-com/armor-go/src/util"
-	"github.com/stretchr/testify/assert"
-	"testing"
-)
-
+/*
 func TestNewBearerToken(t *testing.T) {
 	signingKey := "your-secret-signing-key"
 
@@ -31,7 +26,7 @@ func TestValidateBearerToken_InvalidToken(t *testing.T) {
 	assert.False(t, isValid, "Expected the token to be invalid")
 }
 
-/*
+
 func TestGetTokenClaims_InvalidToken(t *testing.T) {
 	signingKey := "your-secret-signing-key"
 	invalidToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"

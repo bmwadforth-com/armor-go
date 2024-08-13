@@ -20,8 +20,8 @@ const (
 	JwtID          RegisteredClaim = "jti"
 )
 
-func NewClaimSet(claims map[string]interface{}) ClaimSet {
-	return claims
+func NewClaimSet() ClaimSet {
+	return ClaimSet{}
 }
 
 func (c *ClaimSet) Add(key string, value interface{}) error {

@@ -48,10 +48,10 @@ func (h *Header) GetAlgorithm() (AlgorithmType, error) {
 		return "", errors.New("arguments were invalid")
 	}
 
-	jsonBytes := h.Metadata.Bytes
+	jsonBytes := h.Metadata.Json
 
 	var headerMap map[string]interface{}
-	if err := json.Unmarshal(jsonBytes, &headerMap); err != nil {
+	if err := json.Unmarshal([]byte(jsonBytes), &headerMap); err != nil {
 		return "", err
 	}
 
@@ -73,10 +73,10 @@ func (h *Header) GetEncryptionAlgorithm() (AuthAlgorithmType, error) {
 		return "", errors.New("arguments were invalid")
 	}
 
-	jsonBytes := h.Metadata.Bytes
+	jsonBytes := h.Metadata.Json
 
 	var headerMap map[string]interface{}
-	if err := json.Unmarshal(jsonBytes, &headerMap); err != nil {
+	if err := json.Unmarshal([]byte(jsonBytes), &headerMap); err != nil {
 		return "", err
 	}
 
