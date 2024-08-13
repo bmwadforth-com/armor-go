@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/bmwadforth-com/armor-go/compare/v0.5.0...v0.6.0) (2024-08-13)
+
+
+### Features
+
+* adding builder ([#19](https://github.com/bmwadforth-com/armor-go/issues/19)) ([38d3f0a](https://github.com/bmwadforth-com/armor-go/commit/38d3f0ad78f42586d3ff5e5279c536c5a29fe2fb))
+
 ## [0.5.0](https://github.com/bmwadforth-com/armor-go/compare/v0.4.0...v0.5.0) (2024-08-13)
 
 
