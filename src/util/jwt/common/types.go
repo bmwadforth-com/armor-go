@@ -76,7 +76,7 @@ type Token struct {
 type TokenInstance interface {
 	// Encode generates a serialized representation of the token, typically in a compact format like JWE or JWT.
 	// It returns the encoded token as a byte slice and any potential errors encountered during encoding.
-	Encode() ([]byte, error)
+	Encode() (string, error)
 
 	// Decode parses a serialized token (split into its parts) and populates the internal token structure.
 	// For JWS, the header, payload, SignFunc and ValidateFunc are all populated (along with Metadata byte values).

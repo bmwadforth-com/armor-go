@@ -11,6 +11,28 @@ type TokenBuilder struct {
 	algSuite common.AlgorithmSuite
 }
 
+// DecodeToken decodes a token string using the provided key and returns a TokenBuilder.
+//
+// Parameters:
+//   - tokenString: The string representation of the token to be decoded.
+//   - key: The key (byte slice) used for decoding the token.
+//
+// Returns:
+//   - A pointer to a TokenBuilder containing the decoded token information and algorithm suite.
+//   - An error if there's an issue decoding the token or extracting algorithm details.
+//
+// This function performs the following steps:
+// 1. Decodes the token string using the `decodeToken` helper function and the provided key.
+// 2. Creates a new TokenBuilder and sets its `token` field to the decoded token.
+// 3. Switches on the token type:
+//   - If JWE (JSON Web Encryption):
+//   - Extracts the algorithm and encryption algorithm from the token header.
+//   - Sets the TokenBuilder's `algSuite` with the extracted algorithms.
+//   - If JWS (JSON Web Signature):
+//   - Extracts the algorithm from the token header.
+//   - Sets the TokenBuilder's `algSuite` with the extracted algorithm.
+//     4. Returns the TokenBuilder and a nil error if successful, or a nil TokenBuilder and the
+//     corresponding error if there was an issue during decoding or algorithm extraction.
 func DecodeToken(tokenString string, key []byte) (*TokenBuilder, error) {
 	token, err := decodeToken(tokenString, key)
 	if err != nil {
@@ -114,14 +136,9 @@ func (b *TokenBuilder) AddClaims(claims common.ClaimSet) *TokenBuilder {
 }
 
 func (b *TokenBuilder) Validate() (bool, error) {
-	return validateToken(b.token)
+	return b.token.TokenInstance.Validate()
 }
 
 func (b *TokenBuilder) Serialize() (string, error) {
-	encode, err := b.token.TokenInstance.Encode()
-	if err != nil {
-		return "", err
-	}
-
-	return string(encode), nil
+	return b.token.TokenInstance.Encode()
 }

@@ -1,8 +1,8 @@
 package jws
 
 import (
-	"bytes"
 	"crypto"
+	"crypto/hmac"
 	"crypto/rsa"
 	"crypto/sha256"
 	"crypto/x509"
@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/bmwadforth-com/armor-go/src/util/jwt/common"
+	"strings"
 )
 
 func getJwsValidateFunc(a common.AlgorithmType) ValidateFunc {
@@ -29,16 +30,20 @@ func getJwsValidateFunc(a common.AlgorithmType) ValidateFunc {
 }
 
 func validateHMAC256(t *Token) (bool, error) {
-	copiedRawToken := make([]byte, len(t.Raw))
-	copy(copiedRawToken, t.Raw)
-
-	encodedBytes, err := t.Encode()
+	parts := strings.Split(t.Raw, ".")
+	if len(parts) != 3 {
+		return false, errors.New("invalid token format")
+	}
+	existingHMAC, err := base64.RawURLEncoding.DecodeString(parts[2])
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("invalid HMAC format: %v", err)
 	}
 
-	if !bytes.Equal(encodedBytes, copiedRawToken) {
-		return false, errors.New("failed to validate token - bytes are not equal")
+	payload := strings.Join(parts[:2], ".")
+	expectedHMAC, _ := signHMAC256(t, []byte(payload))
+
+	if !hmac.Equal(existingHMAC, expectedHMAC) {
+		return false, errors.New("token validation failed")
 	}
 
 	return true, nil

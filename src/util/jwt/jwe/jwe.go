@@ -17,14 +17,14 @@ type Token struct {
 	Payload common.Payload
 	SignFunc
 	ValidateFunc
-	Raw []byte
+	Raw        string
+	PrivateKey []byte
+	PublicKey  []byte
 
-	encryptedKey []byte // Encrypt the CEK with the recipient's public key using the "alg" to produce the JWE Encrypted Key.
+	encryptedKey []byte
 	iv           []byte
 	cipherText   []byte
 	authTag      []byte
-	PrivateKey   []byte
-	PublicKey    []byte
 	cek          []byte
 }
 
@@ -45,27 +45,27 @@ func New(alg common.AlgorithmSuite, claims common.ClaimSet, publicKey []byte) (*
 	t.SignFunc = getJweSignFunc(alg)
 	t.ValidateFunc = getJweValidateFunc(alg)
 
-	t.Raw = []byte{}
+	t.Raw = ""
 	t.PublicKey = publicKey
 
 	return t, nil
 }
 
-func (t *Token) Encode() ([]byte, error) {
+func (t *Token) Encode() (string, error) {
 	var err error
 	_, err = t.Header.Serialize()
 	if err != nil {
-		return nil, fmt.Errorf("failed to encode header: %w", err)
+		return "", fmt.Errorf("failed to encode header: %w", err)
 	}
 
 	_, err = t.Payload.Serialize()
 	if err != nil {
-		return nil, fmt.Errorf("failed to encode payload: %w", err)
+		return "", fmt.Errorf("failed to encode payload: %w", err)
 	}
 
 	_, err = t.SignFunc(t, t.Payload.Metadata.Bytes)
 	if err != nil {
-		return nil, fmt.Errorf("failed to sign JWT: %w", err)
+		return "", fmt.Errorf("failed to sign JWT: %w", err)
 	}
 
 	parts := []string{
@@ -77,7 +77,7 @@ func (t *Token) Encode() ([]byte, error) {
 	}
 
 	jwe := strings.Join(parts, ".")
-	t.Raw = []byte(jwe)
+	t.Raw = jwe
 
 	return t.Raw, nil
 }
@@ -116,7 +116,7 @@ func (t *Token) Decode(parts []string) error {
 		AuthAlgorithmType: authAlg,
 	}
 
-	t.Raw = []byte(strings.Join(parts, "."))
+	t.Raw = strings.Join(parts, ".")
 	t.SignFunc = getJweSignFunc(suite)
 	t.ValidateFunc = getJweValidateFunc(suite)
 
