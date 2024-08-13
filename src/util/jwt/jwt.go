@@ -8,21 +8,14 @@ import (
 	"strings"
 )
 
-func New(alg common.AlgorithmSuite, claims common.ClaimSet, key []byte) (*common.Token, error) {
-	var tokenType common.TokenType
-	if common.JwsAlgorithmsMap[alg.AlgorithmType] {
-		tokenType = common.JWS
-	} else if common.JweAlgorithmsMap[alg.AlgorithmType] {
-		tokenType = common.JWE
-	}
-
+func newToken(tokenType common.TokenType, alg common.AlgorithmSuite, claims common.ClaimSet, key []byte) (*common.Token, error) {
 	if tokenType == "" {
 		return nil, errors.New("invalid algorithm")
 	}
 
 	token := new(common.Token)
 	token.TokenType = tokenType
-	token.Raw = []byte{}
+	token.Metadata = &common.Metadata{}
 	token.Claims = claims
 
 	switch token.TokenType {
@@ -45,9 +38,9 @@ func New(alg common.AlgorithmSuite, claims common.ClaimSet, key []byte) (*common
 	return token, nil
 }
 
-func Encode(t *common.Token) ([]byte, error) {
-	if t.Raw == nil || t.TokenType == "" {
-		return nil, errors.New("invalid token. make sure you call New before you call Encode")
+func encodeToken(t *common.Token) ([]byte, error) {
+	if t.Metadata == nil || t.TokenType == "" {
+		return nil, errors.New("invalid token. make sure you call newToken before you call encodeToken")
 	}
 
 	var err error
@@ -57,26 +50,28 @@ func Encode(t *common.Token) ([]byte, error) {
 		if !ok {
 			return nil, errors.New("invalid token")
 		}
-		t.Raw, err = tokenInstance.Encode()
+		t.Metadata.Bytes, err = tokenInstance.Encode()
 	case common.JWE:
 		tokenInstance, ok := t.TokenInstance.(*jwe.Token)
 		if !ok {
 			return nil, errors.New("invalid token")
 		}
-		t.Raw, err = tokenInstance.Encode()
+		t.Metadata.Bytes, err = tokenInstance.Encode()
 	}
 
 	if err != nil {
 		return nil, err
 	}
 
-	return t.Raw, nil
+	return t.Metadata.Bytes, nil
 }
 
-func Decode(tokenString string, key []byte) (*common.Token, error) {
-	token := common.Token{Raw: []byte(tokenString)}
-	jwtParts := strings.Split(tokenString, ".")
+func decodeToken(tokenString string, key []byte) (*common.Token, error) {
 	var err error
+	token := common.Token{Metadata: &common.Metadata{
+		Base64: tokenString,
+	}}
+	jwtParts := strings.Split(tokenString, ".")
 
 	switch len(jwtParts) {
 	case 3:
@@ -88,7 +83,7 @@ func Decode(tokenString string, key []byte) (*common.Token, error) {
 		if err != nil {
 			return nil, err
 		}
-		token.Claims = jwsToken.Payload.ClaimSet
+		token.Claims = jwsToken.Payload.Data
 	case 5:
 		token.TokenType = common.JWE
 		jweToken := new(jwe.Token)
@@ -105,8 +100,8 @@ func Decode(tokenString string, key []byte) (*common.Token, error) {
 	return &token, nil
 }
 
-func Validate(t *common.Token) (bool, error) {
-	if t.Raw == nil {
+func validateToken(t *common.Token) (bool, error) {
+	if t.Metadata == nil {
 		return false, errors.New("jwt token is empty - you must call decode before validate")
 	}
 
@@ -129,7 +124,7 @@ func Validate(t *common.Token) (bool, error) {
 		if !ok {
 			return false, err
 		}
-		t.Claims = tokenInstance.Payload.ClaimSet
+		t.Claims = tokenInstance.Payload.Data
 	}
 
 	return true, nil

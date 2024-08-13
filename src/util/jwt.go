@@ -8,36 +8,27 @@ import (
 
 func NewBearerToken(signingKey string) ([]byte, error) {
 	key := []byte(signingKey)
-
 	claims := common.NewClaimSet()
 	claims.Add(string(common.Audience), "web-template")
 	claims.Add(string(common.Subject), "web-template")
 	claims.Add(string(common.IssuedAt), time.Now())
-
-	token, err := jwt.New(common.AlgorithmSuite{
-		AlgorithmType: common.HS256,
-	}, claims, key)
+	token, err := jwt.NewJWSToken(common.HS256, key).AddClaims(claims).Serialize()
 	if err != nil {
 		return nil, err
 	}
 
-	tokenBytes, err := jwt.Encode(token)
-	if err != nil {
-		return nil, err
-	}
-
-	return tokenBytes, nil
+	return []byte(token), nil
 }
 
 func ValidateBearerToken(tokenString string, signingKey string) (bool, error) {
 	key := []byte(signingKey)
 
-	token, err := jwt.Decode(tokenString, key)
+	tokenBuilder, err := jwt.DecodeToken(tokenString, key)
 	if err != nil {
 		return false, err
 	}
 
-	_, err = jwt.Validate(token)
+	_, err = tokenBuilder.Validate()
 	if err != nil {
 		return false, err
 	}
@@ -48,10 +39,10 @@ func ValidateBearerToken(tokenString string, signingKey string) (bool, error) {
 func GetTokenClaims(tokenString string, signingKey string) (map[string]interface{}, error) {
 	key := []byte(signingKey)
 
-	token, err := jwt.Decode(tokenString, key)
+	tokenBuilder, err := jwt.DecodeToken(tokenString, key)
 	if err != nil {
 		return nil, err
 	}
 
-	return token.Claims, nil
+	return tokenBuilder.GetClaims(), nil
 }

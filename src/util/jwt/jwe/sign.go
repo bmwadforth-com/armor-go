@@ -26,7 +26,7 @@ func signRSAOAEPA256GCM(t *Token, plaintext []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	keySize, err := t.Header.GetAuthAlgorithm()
+	keySize, err := t.Header.GetEncryptionAlgorithm()
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func signRSAOAEPA256GCM(t *Token, plaintext []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	ciphertext, nonce, authTag, err := crypto.EncryptAESGCM(cek, plaintext, t.Header.Raw)
+	ciphertext, nonce, authTag, err := crypto.EncryptAESGCM(cek, plaintext, t.Header.Metadata.Bytes)
 	if err != nil {
 		return nil, err
 	}
