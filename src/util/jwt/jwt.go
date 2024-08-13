@@ -67,12 +67,11 @@ func encodeToken(t *common.Token) ([]byte, error) {
 }
 
 func decodeToken(tokenString string, key []byte) (*common.Token, error) {
+	var err error
 	token := common.Token{Metadata: &common.Metadata{
-		Bytes:  []byte(tokenString),
 		Base64: tokenString,
 	}}
 	jwtParts := strings.Split(tokenString, ".")
-	var err error
 
 	switch len(jwtParts) {
 	case 3:

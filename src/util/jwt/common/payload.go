@@ -3,6 +3,7 @@ package common
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 )
 
 func (p *Payload) Serialize() ([]byte, error) {
@@ -23,14 +24,21 @@ func (p *Payload) Serialize() ([]byte, error) {
 }
 
 func (p *Payload) Deserialize(b []byte) (*Payload, error) {
-	jsonBytes, err := base64.RawURLEncoding.DecodeString(string(b))
-	if err != nil {
-		return nil, err
+	var jsonBytes []byte
+	var err error
+
+	if isBase64(b) {
+		jsonBytes, err = base64.RawURLEncoding.DecodeString(string(b))
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode Base64: %w", err)
+		}
+	} else {
+		jsonBytes = b
 	}
 
 	err = json.Unmarshal(jsonBytes, &p.Data)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal JSON: %w", err)
 	}
 
 	p.Metadata = &Metadata{
@@ -40,4 +48,9 @@ func (p *Payload) Deserialize(b []byte) (*Payload, error) {
 	}
 
 	return p, nil
+}
+
+func isBase64(b []byte) bool {
+	_, err := base64.RawURLEncoding.DecodeString(string(b))
+	return err == nil
 }

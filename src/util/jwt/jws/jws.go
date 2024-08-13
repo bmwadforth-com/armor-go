@@ -74,26 +74,33 @@ func (t *Token) Encode() ([]byte, error) {
 
 func (t *Token) Decode(parts []string) error {
 	headerBytes := []byte(parts[0])
+	payloadBytes := []byte(parts[1])
+	signatureBytes := []byte(parts[2])
 	_, err := t.Header.Deserialize(headerBytes)
 	if err != nil {
 		return fmt.Errorf("failed to decode JWS header: %w", err)
 	}
 
-	payloadBytes := []byte(parts[1])
 	_, err = t.Payload.Deserialize(payloadBytes)
 	if err != nil {
 		return fmt.Errorf("failed to decode JWS payload: %w", err)
 	}
 
+	decodedSignature, err := base64.RawURLEncoding.DecodeString(parts[2])
+	if err != nil {
+		return fmt.Errorf("failed to decode JWS signature: %w", err)
+	}
+	
 	t.Signature.Metadata = &common.Metadata{
-		Bytes: []byte(parts[2]),
+		Bytes:  decodedSignature,
+		Base64: parts[2],
 	}
 
 	alg, err := t.Header.GetAlgorithm()
 	if err != nil {
 		return err
 	}
-	t.Raw = []byte(fmt.Sprintf("%s.%s.%s", t.Header.Metadata.Base64, t.Payload.Metadata.Base64, t.Signature.Metadata.Base64))
+	t.Raw = []byte(fmt.Sprintf("%s.%s.%s", headerBytes, payloadBytes, signatureBytes))
 	t.SignFunc = getJwsSignFunc(alg)
 	t.ValidateFunc = getJwsValidateFunc(alg)
 
