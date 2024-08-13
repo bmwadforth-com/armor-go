@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/bmwadforth-com/armor-go/compare/v0.6.0...v0.6.1) (2024-08-13)
+
+
+### Bug Fixes
+
+* updating logger ([#21](https://github.com/bmwadforth-com/armor-go/issues/21)) ([ad1b92a](https://github.com/bmwadforth-com/armor-go/commit/ad1b92a0b54022d5c07b0fe5e0d3f19f988ec7d6))
+
 ## [0.6.0](https://github.com/bmwadforth-com/armor-go/compare/v0.5.0...v0.6.0) (2024-08-13)
 
 
