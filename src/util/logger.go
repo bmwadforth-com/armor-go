@@ -5,6 +5,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"log"
+	"os"
 )
 
 var (
@@ -12,12 +13,36 @@ var (
 	Logger  *zap.Logger
 )
 
-func InitLogger() func(*zap.Logger) {
-	Logger, _ = zap.NewProduction()
-	SLogger = Logger.Sugar()
+func InitLogger(isRelease bool, minimumLevel zapcore.Level) func() {
+	if isRelease {
+		encoderConfig := zap.NewProductionEncoderConfig()
+		encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 
-	return func(logger *zap.Logger) {
-		err := logger.Sync()
+		core := zapcore.NewCore(
+			zapcore.NewJSONEncoder(encoderConfig),
+			zapcore.AddSync(os.Stdout),
+			zap.NewAtomicLevelAt(minimumLevel),
+		)
+
+		Logger = zap.New(core)
+		SLogger = Logger.Sugar()
+	} else {
+		encoderConfig := zap.NewDevelopmentEncoderConfig()
+		encoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+		encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+
+		core := zapcore.NewCore(
+			zapcore.NewConsoleEncoder(encoderConfig),
+			zapcore.AddSync(os.Stdout),
+			zap.NewAtomicLevelAt(minimumLevel),
+		)
+
+		Logger = zap.New(core)
+		SLogger = Logger.Sugar()
+	}
+
+	return func() {
+		err := Logger.Sync()
 		if err != nil {
 			log.Fatalf("failed to flush log buffer: %v", err)
 		}
@@ -42,4 +67,9 @@ func LogWarn(template string, args ...interface{}) {
 func LogError(template string, args ...interface{}) {
 	msg := fmt.Sprintf(template, args...)
 	SLogger.Logf(zap.ErrorLevel, fmt.Sprintf("[Armor - ERROR]: %s", msg))
+}
+
+func LogFatal(template string, args ...interface{}) {
+	msg := fmt.Sprintf(template, args...)
+	SLogger.Logf(zap.FatalLevel, fmt.Sprintf("[Armor - FATAL]: %s", msg))
 }
