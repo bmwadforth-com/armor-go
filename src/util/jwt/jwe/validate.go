@@ -6,9 +6,8 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha256"
-	"crypto/x509"
-	"encoding/pem"
 	"fmt"
+	"github.com/bmwadforth-com/armor-go/src/util/crypto"
 	"github.com/bmwadforth-com/armor-go/src/util/jwt/common"
 	"strings"
 )
@@ -26,7 +25,7 @@ func getJweValidateFunc(a common.AlgorithmSuite) ValidateFunc {
 }
 
 func validateRSAOAEPA256GCM(t *Token) (bool, error) {
-	privateKey, err := decodePrivateKey(t.PrivateKey)
+	privateKey, err := crypto.DecodeRsaPrivateKey(t.PrivateKey)
 	if err != nil {
 		return false, err
 	}
@@ -43,18 +42,6 @@ func validateRSAOAEPA256GCM(t *Token) (bool, error) {
 	}
 
 	return true, nil
-}
-
-func decodePrivateKey(privateKeyPEM []byte) (*rsa.PrivateKey, error) {
-	pemBlock, _ := pem.Decode(privateKeyPEM)
-	if pemBlock == nil {
-		return nil, fmt.Errorf("failed to parse PEM block containing the private key")
-	}
-	privateKey, err := x509.ParsePKCS8PrivateKey(pemBlock.Bytes)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse private key: %w", err)
-	}
-	return privateKey.(*rsa.PrivateKey), nil
 }
 
 func decryptJWE(t *Token, privateKey *rsa.PrivateKey) ([]byte, error) {

@@ -2,7 +2,6 @@ package jwt
 
 import (
 	"errors"
-	"fmt"
 	"github.com/bmwadforth-com/armor-go/src/util/jwt"
 	"github.com/bmwadforth-com/armor-go/src/util/jwt/common"
 	"github.com/stretchr/testify/assert"
@@ -24,12 +23,10 @@ func TestEncodeHMAC(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	encodedBytes, err := jwt.Encode(token)
+	_, err = jwt.Encode(token)
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	fmt.Println(string(encodedBytes))
 }
 
 func TestDecodeHMAC(t *testing.T) {
